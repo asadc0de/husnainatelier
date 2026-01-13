@@ -1,0 +1,71 @@
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import heroBg from '../assets/hero_pastel.png';
+import kurtiImg from '../assets/kurti.png';
+import lehengaImg from '../assets/lehenga.png';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const Categories = () => {
+    const sectionRef = useRef(null);
+    const columnsRef = useRef([]);
+
+    const collections = [
+        { name: 'Bridal', image: heroBg },
+        { name: 'Festive', image: kurtiImg },
+        { name: 'Modern', image: lehengaImg },
+    ];
+
+    useEffect(() => {
+        gsap.fromTo(columnsRef.current,
+            { y: 100, opacity: 0 },
+            {
+                y: 0,
+                opacity: 1,
+                duration: 1.2,
+                stagger: 0.2,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: "top 70%",
+                }
+            }
+        );
+    }, []);
+
+    return (
+        <section ref={sectionRef} className="w-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 md:h-[80vh] md:min-h-[600px] gap-[1px]">
+                {collections.map((col, index) => (
+                    <div
+                        key={col.name}
+                        ref={el => columnsRef.current[index] = el}
+                        className="relative group overflow-hidden h-[70vh] md:h-full cursor-pointer "
+                    >
+                        {/* Background Image */}
+                        <div
+                            className="absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] ease-out group-hover:scale-110"
+                            style={{ backgroundImage: `url(${col.image})` }}
+                        ></div>
+
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-500"></div>
+
+                        {/* Content */}
+                        <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6 z-10">
+                            <h3 className="text-3xl md:text-4xl font-serif tracking-wide mb-4 transform translate-y-0 transition-transform duration-500 group-hover:-translate-y-2">
+                                {col.name}
+                            </h3>
+                            <span className="text-xs uppercase tracking-[0.25em] opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-100 border-b border-white pb-1">
+                                View Collection
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+};
+
+export default Categories;

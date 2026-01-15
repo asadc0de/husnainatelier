@@ -1,15 +1,44 @@
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import brandBg from '../assets/lehenga.png';
+import { Link } from 'react-router-dom';
+import { useAnimation } from '../context/AnimationContext';
+import storyBg from '../assets/story_wide.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const BrandStory = () => {
-    const contentRef = useRef(null);
+    const containerRef = useRef(null);
+    const textRef = useRef(null);
+
+    const { hasPlayedIntro } = useAnimation();
 
     useEffect(() => {
-        gsap.fromTo(contentRef.current.children,
+        if (hasPlayedIntro) {
+            gsap.set(textRef.current.children, { y: 0, opacity: 1 });
+            return;
+        }
+
+        // Parallax effect for background (always runs for visual appeal, or can trigger one-time?)
+        // Let's keep parallax always running as it's scroll-bound interaction, not an "intro" animation.
+        // Actually, user said "animation on full landing page first render work".
+        // Usually parallax is fine to keep, but the text fade-in is the "intro".
+        gsap.fromTo(containerRef.current.querySelector('img'),
+            { scale: 1.1 },
+            {
+                scale: 1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
+            }
+        );
+
+        // Text fade in
+        gsap.fromTo(textRef.current.children,
             { y: 30, opacity: 0 },
             {
                 y: 0,
@@ -17,42 +46,37 @@ const BrandStory = () => {
                 duration: 1,
                 stagger: 0.2,
                 scrollTrigger: {
-                    trigger: contentRef.current,
-                    start: "top 75%",
+                    trigger: containerRef.current,
+                    start: "top 60%",
                 }
             }
         );
-    }, []);
+    }, [hasPlayedIntro]);
 
     return (
-        <section className="py-32 bg-[#faf9f6]"> {/* Extremely light warm gray/white */}
-            <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center gap-16">
+        <section ref={containerRef} className="relative w-full h-screen overflow-hidden mt-24">
+            {/* Background Image */}
+            <div className="absolute inset-0">
+                <img
+                    src={storyBg}
+                    alt="Brand Story"
+                    className="w-full h-full object-cover"
+                />
+                {/* Dark Overlay for text readability */}
+                <div className="absolute inset-0 bg-black/30"></div>
+            </div>
 
-                {/* Image Side (Optional based on design, but let's keep it text focused for now or add a small image)
-                    Design showed text on right, image on left typically, or just centered text. 
-                    Let's follow "Refined craftsmanship meeting contemporary silhouettes" which looks like a centered block or split.
-                    I'll do a Split Layout: Image Left, Text Right as is classic luxury.
-                */}
-
-                <div className="w-full md:w-1/2 h-[75vh] md:h-auto md:aspect-[4/5] bg-gray-200 relative overflow-hidden">
-                    {/* Placeholder image box */}
-                    <img src={brandBg} alt="Atelier detail" className="w-full h-full object-cover opacity-90" />
-                </div>
-
-                <div className="w-full md:w-1/2" ref={contentRef}>
-                    <p className="text-xs font-sans uppercase tracking-[0.25em] text-gray-500 mb-6">Atelier 2026</p>
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-primary leading-tight mb-8">
+            {/* Centered Content */}
+            <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4 text-white">
+                <div ref={textRef} className="max-w-2xl mx-auto">
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-tight mb-8">
                         Refined craftsmanship meeting <br />
                         <span className="italic">contemporary silhouettes.</span>
                     </h2>
-                    <p className="text-gray-600 leading-relaxed mb-10 max-w-md font-sans font-light">
-                        Our latest edit explores the intersection of traditional embroidery and stark, modern lines. Handwoven pieces sourced from the heart of the Punjab, tailored for the global woman.
-                    </p>
-                    <button className="px-10 py-4 border border-primary text-primary uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all duration-300">
-                        Explore The Edit
-                    </button>
+                    <Link to="/category/bridal" className="px-10 py-4 bg-white text-black uppercase tracking-widest text-xs font-bold hover:bg-secondary hover:text-white transition-all duration-300 inline-block">
+                        Shop
+                    </Link>
                 </div>
-
             </div>
         </section>
     );

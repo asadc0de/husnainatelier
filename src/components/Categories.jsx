@@ -1,15 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
 import heroBg from '../assets/hero_pastel.png';
 import kurtiImg from '../assets/kurti.png';
 import lehengaImg from '../assets/lehenga.png';
+import { useAnimation } from '../context/AnimationContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Categories = () => {
     const sectionRef = useRef(null);
     const columnsRef = useRef([]);
+    const titleRef = useRef(null);
 
     const collections = [
         { name: 'Bridal', image: heroBg },
@@ -17,31 +20,53 @@ const Categories = () => {
         { name: 'Modern', image: lehengaImg },
     ];
 
+    const { hasPlayedIntro } = useAnimation();
+
     useEffect(() => {
-        gsap.fromTo(columnsRef.current,
-            { y: 100, opacity: 0 },
-            {
-                y: 0,
-                opacity: 1,
-                duration: 1.2,
-                stagger: 0.2,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 70%",
-                }
+        if (hasPlayedIntro) {
+            gsap.set(columnsRef.current, { y: 0, opacity: 1 });
+            gsap.set(titleRef.current, { y: 0, opacity: 1 });
+            return;
+        }
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: sectionRef.current,
+                start: "top 70%",
             }
-        );
-    }, []);
+        });
+
+        tl.fromTo(titleRef.current,
+            { y: 50, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1, ease: "power3.out" }
+        )
+            .fromTo(columnsRef.current,
+                { y: 100, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1.2,
+                    stagger: 0.2,
+                    ease: "power3.out",
+                },
+                "-=0.5"
+            );
+    }, [hasPlayedIntro]);
 
     return (
-        <section ref={sectionRef} className="w-full">
+        <section ref={sectionRef} className="w-full bg-[#FFF7E4] py-16">
+            <div className="px-8 mb-12 text-center">
+                <h2 ref={titleRef} className="text-3xl md:text-5xl font-serif text-black uppercase tracking-widest">
+                    Our Latest Collections
+                </h2>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 md:h-[80vh] md:min-h-[600px] gap-[1px]">
                 {collections.map((col, index) => (
-                    <div
+                    <Link
+                        to={`/category/${col.name.toLowerCase()}`}
                         key={col.name}
                         ref={el => columnsRef.current[index] = el}
-                        className="relative group overflow-hidden h-[70vh] md:h-full cursor-pointer "
+                        className="relative group overflow-hidden h-[70vh] md:h-full cursor-pointer block"
                     >
                         {/* Background Image */}
                         <div
@@ -61,7 +86,7 @@ const Categories = () => {
                                 View Collection
                             </span>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </section>

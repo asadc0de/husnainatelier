@@ -1,70 +1,48 @@
 import React from 'react';
-import { Instagram, Facebook, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
     return (
-        <footer className="bg-white pt-24 pb-8 text-primary border-t border-gray-100">
-            <div className="container mx-auto px-8 md:px-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-20">
+        <footer className="pt-24 pb-8 bg-[#050505] text-[#FFF7E4] border-t border-[#FFF7E4]/20 min-h-screen flex flex-col justify-between">
+            <div className="container mx-auto px-6 md:px-12 flex-1 flex flex-col justify-start">
+                {/* Top Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start gap-12 w-full">
+                    <div className="max-w-md">
+                        <h2 className="text-3xl md:text-5xl font-serif text-[#FFF7E4]">Experience the Atelier</h2>
+                    </div>
 
-                    {/* Brand / Contact */}
-                    <div className="md:col-span-1">
-                        <h2 className="text-xl font-serif font-bold tracking-[0.1em] mb-6">HUSNAIN ATELIER</h2>
-                        <div className="text-sm text-gray-500 font-sans space-y-4 leading-relaxed">
-                            <p>Defining contemporary luxury with heritage craftsmanship.</p>
-                            <div className="flex space-x-4 pt-2">
-                                <a href="#" className="hover:text-secondary transition-colors"><Instagram size={18} /></a>
-                                <a href="#" className="hover:text-secondary transition-colors"><Facebook size={18} /></a>
-                            </div>
+                    <div className="flex gap-16 md:gap-32 text-sm font-sans text-[#FFF7E4]/60">
+                        <div className="flex flex-col gap-4">
+                            <h4 className="font-bold text-[#FFF7E4] mb-2">Shop</h4>
+                            <Link to="/category/modern" className="hover:text-[#FFF7E4] transition-colors">New Arrivals</Link>
+                            <Link to="/category/bridal" className="hover:text-[#FFF7E4] transition-colors">Bridal</Link>
+                            <Link to="/category/festive" className="hover:text-[#FFF7E4] transition-colors">Festive</Link>
+                            <Link to="/category/accessories" className="hover:text-[#FFF7E4] transition-colors">Accessories</Link>
                         </div>
-                    </div>
-
-                    {/* Shop */}
-                    <div>
-                        <h4 className="font-serif text-sm font-bold uppercase tracking-widest mb-6">Shop</h4>
-                        <ul className="space-y-3 text-xs md:text-sm text-gray-500 font-sans tracking-wide">
-                            <li className="hover:text-primary cursor-pointer transition-colors">New Arrivals</li>
-                            <li className="hover:text-primary cursor-pointer transition-colors">Bridal</li>
-                            <li className="hover:text-primary cursor-pointer transition-colors">Festive Collection</li>
-                            <li className="hover:text-primary cursor-pointer transition-colors">Accessories</li>
-                        </ul>
-                    </div>
-
-                    {/* Atelier */}
-                    <div>
-                        <h4 className="font-serif text-sm font-bold uppercase tracking-widest mb-6">Atelier</h4>
-                        <ul className="space-y-3 text-xs md:text-sm text-gray-500 font-sans tracking-wide">
-                            <li className="hover:text-primary cursor-pointer transition-colors">Our Story</li>
-                            <li className="hover:text-primary cursor-pointer transition-colors">Contact</li>
-                            <li className="hover:text-primary cursor-pointer transition-colors">Book Appointment</li>
-                            <li className="hover:text-primary cursor-pointer transition-colors">Customer Care</li>
-                        </ul>
-                    </div>
-
-                    {/* Newsletter */}
-                    <div>
-                        <h4 className="font-serif text-sm font-bold uppercase tracking-widest mb-6">Newsletter</h4>
-                        <p className="text-xs text-gray-500 mb-4">Subscribe to receive updates, access to exclusive deals, and more.</p>
-                        <div className="flex border-b border-primary pb-2">
-                            <input
-                                type="email"
-                                placeholder="Email Address"
-                                className="w-full bg-transparent outline-none text-sm placeholder:text-gray-400"
-                            />
-                            <button className="text-xs uppercase tracking-widest font-bold hover:text-secondary transition-colors">
-                                Subscribe
-                            </button>
+                        <div className="flex flex-col gap-4">
+                            <h4 className="font-bold text-[#FFF7E4] mb-2">About</h4>
+                            <Link to="/" className="hover:text-[#FFF7E4] transition-colors">Our Story</Link>
+                            <Link to="/" className="hover:text-[#FFF7E4] transition-colors">Contact</Link>
+                            <Link to="/" className="hover:text-[#FFF7E4] transition-colors">Bookings</Link>
+                            <Link to="/" className="hover:text-[#FFF7E4] transition-colors">Legal</Link>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Bottom Bar */}
-                <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-[0.2em] text-gray-400">
-                    <p>&copy; 2026 Husnain Atelier.</p>
-                    <div className="flex space-x-6 mt-4 md:mt-0">
-                        <a href="#" className="hover:text-primary transition-colors">Instagram</a>
-                        <a href="#" className="hover:text-primary transition-colors">Facebook</a>
-                        <a href="#" className="hover:text-primary transition-colors">Pinterest</a>
+            <div>
+                {/* Massive Brand Text - Full Width */}
+                <div className="w-full border-b border-[#FFF7E4]/20 pb-2 overflow-hidden">
+                    <h1 className="text-[16vw] leading-[0.8] font-serif font-medium tracking-tight text-[#FFF7E4] w-full text-center whitespace-nowrap">
+                        HUSNAIN ATELIER
+                    </h1>
+                </div>
+
+                <div className="container mx-auto px-6 md:px-12">
+                    {/* Copyright Line */}
+                    <div className="flex justify-between items-center mt-4 text-xs font-sans text-[#FFF7E4]/40 uppercase tracking-wider">
+                        <p>&copy; {new Date().getFullYear()} Husnain Atelier</p>
+                        <p>All Rights Reserved</p>
                     </div>
                 </div>
             </div>

@@ -31,8 +31,16 @@ export const ProductProvider = ({ children }) => {
         setProducts(prev => [productWithId, ...prev]);
     };
 
+    const deleteProduct = (id) => {
+        setProducts(prev => prev.filter(product => product.id !== id));
+    };
+
+    const updateProduct = (id, updatedProduct) => {
+        setProducts(prev => prev.map(product => (product.id === id ? { ...updatedProduct, id } : product)));
+    };
+
     return (
-        <ProductContext.Provider value={{ products, addProduct }}>
+        <ProductContext.Provider value={{ products, addProduct, deleteProduct, updateProduct }}>
             {children}
         </ProductContext.Provider>
     );

@@ -9,7 +9,7 @@ const ImageWithLoader = ({ src, alt, className, ...props }) => {
         <>
             {/* Loader Overlay */}
             {!isLoaded && !hasError && (
-                <div className="absolute inset-0 flex justify-center items-center bg-gray-200 z-10">
+                <div className="absolute inset-0 flex justify-center items-center bg-[#a4a4a4] z-10">
                     <img
                         src={logo}
                         alt="Loading..."

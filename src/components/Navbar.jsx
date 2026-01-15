@@ -71,12 +71,12 @@ const Navbar = () => {
                             onMouseEnter={() => setIsShopOpen(true)}
                             onMouseLeave={() => setIsShopOpen(false)}
                         >
-                            <div
+                            <Link
+                                to="/shop"
                                 className={`font-sans text-sm uppercase tracking-[0.2em] font-medium hover:opacity-70 transition-opacity py-4 flex items-center gap-2 cursor-pointer ${textColorClass}`}
-                                onClick={() => setIsShopOpen(!isShopOpen)}
                             >
                                 Shop <ChevronDown size={14} className={`transition-transform duration-300 ${isShopOpen ? 'rotate-180' : ''}`} />
-                            </div>
+                            </Link>
 
                             {/* Dropdown */}
                             <div className={`absolute left-0 top-full pt-4 min-w-[200px] z-[100] ${isShopOpen ? 'block' : 'hidden'}`}>

@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { useAnimation } from '../context/AnimationContext';
 import { useProduct } from '../context/ProductContext'; // Import context
+import ImageWithLoader from '../components/ImageWithLoader';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -77,9 +78,10 @@ const NewArrivals = () => {
                             className="group cursor-pointer block"
                         >
                             <div className="relative overflow-hidden aspect-[3/4] mb-6 bg-gray-100">
-                                <img
+                                <ImageWithLoader
                                     src={product.image}
                                     alt={product.name}
+                                    loading="lazy"
                                     className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
                                 />
                                 <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import ProductDetails from './components/ProductDetails';
+import ShopPage from './pages/ShopPage'; // Import ShopPage
 import Admin from './pages/Admin';
 import CategoryPage from './pages/CategoryPage';
 import Footer from './components/Footer';
@@ -28,6 +29,7 @@ function App() {
                 <Navbar />
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/shop" element={<ShopPage />} /> {/* Added Shop Route */}
                   <Route path="/product/:id" element={<ProductDetails />} />
                   <Route path="/category/:category" element={<CategoryPage />} />
                   <Route path="/admin" element={<Admin />} />

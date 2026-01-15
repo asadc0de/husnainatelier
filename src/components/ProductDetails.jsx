@@ -7,6 +7,7 @@ import { useProduct } from '../context/ProductContext';
 import heroImg from '../assets/hero_wide.png';
 import kurtiImg from '../assets/kurti.png';
 import lehengaImg from '../assets/lehenga.png';
+import ImageWithLoader from '../components/ImageWithLoader';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -94,9 +95,10 @@ const ProductDetails = () => {
                     </button>
 
                     <div className="h-[90vh] max-w-[90vw] relative" onClick={(e) => e.stopPropagation()}>
-                        <img
+                        <ImageWithLoader
                             src={images[selectedImage]}
                             alt="Full Screen"
+                            loading="lazy"
                             className="h-full w-full object-contain"
                         />
                     </div>
@@ -111,9 +113,10 @@ const ProductDetails = () => {
                     <div className="w-full lg:w-1/2">
                         {/* Main Image with Navigation & Zoom Trigger */}
                         <div className="h-[580px] w-full bg-gray-100 mb-[1px] overflow-hidden relative group">
-                            <img
+                            <ImageWithLoader
                                 src={images[selectedImage]}
                                 alt="Product Main"
+                                loading="lazy"
                                 className="h-full w-full object-cover cursor-zoom-in"
                                 onClick={() => setIsZoomOpen(true)}
                             />
@@ -144,7 +147,7 @@ const ProductDetails = () => {
                                     className={`aspect-square bg-gray-100 cursor-pointer overflow-hidden border-b-2 transition-all ${selectedImage === index ? 'border-primary opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
                                     onClick={() => setSelectedImage(index)}
                                 >
-                                    <img src={img} alt={`Thumbnail ${index}`} className="w-full h-full object-cover" />
+                                    <ImageWithLoader src={img} alt={`Thumbnail ${index}`} loading="lazy" className="w-full h-full object-cover" />
                                 </div>
                             ))}
                         </div>
@@ -213,7 +216,7 @@ const ProductDetails = () => {
                         {relatedProducts.map((product) => (
                             <div key={product.id} className="group cursor-pointer block">
                                 <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-gray-100">
-                                    <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                    <ImageWithLoader src={product.image} alt={product.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 </div>
                                 <div className="flex justify-between items-baseline px-4 pb-8">

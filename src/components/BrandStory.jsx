@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { useAnimation } from '../context/AnimationContext';
 import storyBg from '../assets/story_wide.png';
+import ImageWithLoader from '../components/ImageWithLoader';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -54,28 +55,37 @@ const BrandStory = () => {
     }, [hasPlayedIntro]);
 
     return (
-        <section ref={containerRef} className="relative w-full h-screen overflow-hidden mt-24">
-            {/* Background Image */}
-            <div className="absolute inset-0">
-                <img
-                    src={storyBg}
-                    alt="Brand Story"
-                    className="w-full h-full object-cover"
-                />
-                {/* Dark Overlay for text readability */}
-                <div className="absolute inset-0 bg-black/30"></div>
+        <section className="w-full py-16">
+            <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-5xl font-serif text-black uppercase tracking-widest">
+                    The Story
+                </h2>
             </div>
 
-            {/* Centered Content */}
-            <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4 text-white">
-                <div ref={textRef} className="max-w-2xl mx-auto">
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-tight mb-8">
-                        Refined craftsmanship meeting <br />
-                        <span className="italic">contemporary silhouettes.</span>
-                    </h2>
-                    <Link to="/category/bridal" className="px-10 py-4 bg-white text-black uppercase tracking-widest text-xs font-bold hover:bg-secondary hover:text-white transition-all duration-300 inline-block">
-                        Shop
-                    </Link>
+            <div ref={containerRef} className="relative w-full h-[85vh] overflow-hidden">
+                {/* Background Image */}
+                <div className="absolute inset-0">
+                    <ImageWithLoader
+                        src={storyBg}
+                        alt="Brand Story"
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                    />
+                    {/* Dark Overlay for text readability */}
+                    <div className="absolute inset-0 bg-black/30"></div>
+                </div>
+
+                {/* Centered Content */}
+                <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4 text-white">
+                    <div ref={textRef} className="max-w-2xl mx-auto">
+                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-tight mb-8">
+                            Refined craftsmanship meeting <br />
+                            <span className="italic">contemporary silhouettes.</span>
+                        </h2>
+                        <Link to="/shop" className="px-10 py-4 bg-white text-black uppercase tracking-widest text-xs font-bold hover:bg-secondary hover:text-white transition-all duration-300 inline-block">
+                            Shop
+                        </Link>
+                    </div>
                 </div>
             </div>
         </section>

@@ -2,6 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useProduct } from '../context/ProductContext';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import ImageWithLoader from '../components/ImageWithLoader';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const CategoryPage = () => {
     const { category } = useParams();
@@ -45,9 +49,10 @@ const CategoryPage = () => {
                             className="group cursor-pointer block"
                         >
                             <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
-                                <img
+                                <ImageWithLoader
                                     src={product.image}
                                     alt={product.name}
+                                    loading="lazy"
                                     className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
                                 />
                                 <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

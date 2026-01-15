@@ -55,7 +55,7 @@ const Hero = () => {
                     <p className="text-sm md:text-base font-sans uppercase tracking-[0.3em] mb-12 text-gray-100">
                         Luxuries custom design for formal and bridal
                     </p>
-                    <Link to="/category/bridal" className="px-10 py-3 bg-white text-black text-xs font-sans font-bold uppercase tracking-[0.2em] hover:bg-gray-200 transition-colors cursor-pointer inline-block">
+                    <Link to="/shop" className="px-10 py-3 bg-white text-black text-xs font-sans font-bold uppercase tracking-[0.2em] hover:bg-gray-200 transition-colors cursor-pointer inline-block">
                         Shop
                     </Link>
                 </div>

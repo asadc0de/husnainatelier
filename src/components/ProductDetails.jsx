@@ -11,7 +11,7 @@ import ImageWithLoader from '../components/ImageWithLoader';
 
 const ProductDetails = () => {
     const { id } = useParams();
-    const { products } = useProduct();
+    const { products, loading } = useProduct();
     const { addToCart } = useCart();
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -24,6 +24,38 @@ const ProductDetails = () => {
     useEffect(() => {
         setSelectedImage(0);
     }, [id]);
+
+    if (loading) {
+        return (
+            <div className="pt-32 pb-0 w-full min-h-screen bg-[#FFF7E4]">
+                <div className="flex flex-col lg:flex-row mb-0">
+                    {/* Image Skeleton */}
+                    <div className="w-full lg:w-1/2">
+                        <div className="h-[580px] w-full bg-gray-200 animate-pulse mb-[1px]"></div>
+                        <div className="grid grid-cols-4 gap-[1px]">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="aspect-square bg-gray-200 animate-pulse"></div>
+                            ))}
+                        </div>
+                    </div>
+                    {/* Info Skeleton */}
+                    <div className="w-full lg:w-1/2 px-6 md:px-12 lg:px-24 py-12">
+                        <div className="h-12 w-3/4 bg-gray-200 animate-pulse mb-8"></div>
+                        <div className="h-8 w-1/4 bg-gray-200 animate-pulse mb-12"></div>
+                        <div className="flex gap-4 mb-12">
+                            <div className="flex-1 h-14 bg-gray-200 animate-pulse"></div>
+                            <div className="flex-1 h-14 bg-gray-200 animate-pulse"></div>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="h-4 w-full bg-gray-200 animate-pulse"></div>
+                            <div className="h-4 w-full bg-gray-200 animate-pulse"></div>
+                            <div className="h-4 w-2/3 bg-gray-200 animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!currentProduct) {
         return <div className="min-h-screen pt-32 text-center">Product not found.</div>;

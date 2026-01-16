@@ -4,7 +4,7 @@ import { uploadToCloudinary } from '../utils/cloudinaryHelper';
 import { Upload, Minus, Plus, ChevronLeft, ChevronRight, ZoomIn, Edit, Trash2, ArrowLeft, Loader2 } from 'lucide-react';
 
 const Admin = () => {
-    const { products, addProduct, updateProduct, deleteProduct } = useProduct();
+    const { products, addProduct, updateProduct, deleteProduct, loading } = useProduct();
     const [view, setView] = useState('list'); // 'list' or 'form'
     const [isEditing, setIsEditing] = useState(false);
     const [editId, setEditId] = useState(null);
@@ -12,7 +12,7 @@ const Admin = () => {
 
     const initialFormState = {
         name: '',
-        price: '',
+        price: 'Rs. ',
         description: '',
         category: 'Bridal',
         image: '',
@@ -30,7 +30,21 @@ const Admin = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        let newValue = value;
+
+        if (name === 'name') {
+            // Capitalize first letter of every word
+            newValue = value.replace(/\b\w/g, (char) => char.toUpperCase());
+        }
+
+        if (name === 'price') {
+            // Ensure "Rs. " prefix is always present
+            if (!value.startsWith('Rs. ')) {
+                newValue = 'Rs. ' + value.replace(/^Rs\.\s?/, '');
+            }
+        }
+
+        setFormData(prev => ({ ...prev, [name]: newValue }));
     };
 
     const handleImageChange = (e, index) => {
@@ -196,7 +210,31 @@ const Admin = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {products.length > 0 ? (
+                            {loading ? (
+                                // Loading Skeleton Rows
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <tr key={`skeleton-${index}`} className="border-b border-gray-100">
+                                        <td className="p-2 pl-3">
+                                            <div className="w-10 h-12 bg-gray-400 rounded-sm animate-pulse"></div>
+                                        </td>
+                                        <td className="p-3">
+                                            <div className="h-4 w-32 bg-gray-400 rounded animate-pulse"></div>
+                                        </td>
+                                        <td className="p-3">
+                                            <div className="h-3 w-20 bg-gray-400 rounded animate-pulse"></div>
+                                        </td>
+                                        <td className="p-3">
+                                            <div className="h-4 w-16 bg-gray-400 rounded animate-pulse"></div>
+                                        </td>
+                                        <td className="p-3 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <div className="w-8 h-8 bg-gray-400 rounded animate-pulse"></div>
+                                                <div className="w-8 h-8 bg-gray-400 rounded animate-pulse"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : products.length > 0 ? (
                                 products.map((product) => (
                                     <tr
                                         key={product.id}
@@ -204,7 +242,7 @@ const Admin = () => {
                                         onClick={() => handleEditClick(product)}
                                     >
                                         <td className="p-2 pl-3">
-                                            <div className="w-10 h-12 bg-gray-100 overflow-hidden rounded-sm">
+                                            <div className="w-10 h-12 bg-gray-400 overflow-hidden rounded-sm">
                                                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                                             </div>
                                         </td>
@@ -215,7 +253,7 @@ const Admin = () => {
                                             <div className="flex justify-end gap-2">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleEditClick(product); }}
-                                                    className="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-md transition-all"
+                                                    className="p-1.5 text-gray-400 hover:text-black hover:bg-gray-400 rounded-md transition-all"
                                                     title="Edit"
                                                 >
                                                     <Edit size={16} />
@@ -253,7 +291,7 @@ const Admin = () => {
 
                         {/* Preview Image Gallery Logic */}
                         <div className="w-full">
-                            <div className="h-[580px] w-full bg-gray-100 mb-[1px] overflow-hidden relative group">
+                            <div className="h-[580px] w-full bg-gray-400 mb-[1px] overflow-hidden relative group">
                                 {formData.image ? (
                                     <img
                                         src={formData.image}
@@ -283,7 +321,7 @@ const Admin = () => {
                             {/* Live Thumbnails Preview */}
                             <div className="grid grid-cols-4 gap-[1px]">
                                 {[formData.image, ...formData.additionalImages].slice(0, 4).map((img, i) => (
-                                    <div key={i} className={`aspect-square bg-gray-100 border-b-2 ${i === 0 ? 'border-primary opacity-100' : 'border-transparent opacity-60'}`}>
+                                    <div key={i} className={`aspect-square bg-gray-400 border-b-2 ${i === 0 ? 'border-primary opacity-100' : 'border-transparent opacity-60'}`}>
                                         {img ? (
                                             <img src={img} className="w-full h-full object-cover" alt={`thumb-${i}`} />
                                         ) : (
@@ -332,7 +370,7 @@ const Admin = () => {
                                         name="name"
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none"
+                                        className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none capitalize"
                                         placeholder="e.g. Emerald Silk Kurta"
                                         required
                                     />

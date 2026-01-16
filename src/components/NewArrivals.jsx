@@ -22,9 +22,11 @@ const NewArrivals = () => {
     useEffect(() => {
         if (hasPlayedIntro) {
             // Skip animation, show content immediately
-            gsap.set(titleRef.current, { x: 0, opacity: 1 });
-            gsap.set(viewAllRef.current, { x: 0, opacity: 1 });
-            gsap.set(cardsRef.current, { y: 0, opacity: 1 });
+            if (titleRef.current) gsap.set(titleRef.current, { x: 0, opacity: 1 });
+            if (viewAllRef.current) gsap.set(viewAllRef.current, { x: 0, opacity: 1 });
+            if (cardsRef.current && cardsRef.current.length > 0) {
+                gsap.set(cardsRef.current, { y: 0, opacity: 1 });
+            }
             return;
         }
 
@@ -35,26 +37,33 @@ const NewArrivals = () => {
             }
         });
 
-        tl.fromTo(titleRef.current,
-            { x: -30, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" }
-        )
-            .fromTo(viewAllRef.current,
+        if (titleRef.current) {
+            tl.fromTo(titleRef.current,
+                { x: -30, opacity: 0 },
+                { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" }
+            );
+        }
+
+        if (viewAllRef.current) {
+            tl.fromTo(viewAllRef.current,
                 { x: 30, opacity: 0 },
                 { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" },
                 "<"
-            )
-            .fromTo(cardsRef.current,
+            );
+        }
+
+        if (cardsRef.current && cardsRef.current.length > 0) {
+            tl.fromTo(cardsRef.current,
                 { y: 50, opacity: 0 },
                 { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power2.out" },
                 "-=0.4"
             );
-    }, [hasPlayedIntro]);
+        }
+    }, [hasPlayedIntro, products]);
 
     return (
         <section ref={containerRef} className="py-16 bg-transparent">
             <div className="w-full">
-                {/* Header */}
                 <div className="flex justify-between items-end mb-10 px-8">
                     <h2 ref={titleRef} className="text-3xl md:text-4xl font-serif text-primary">
                         New Arrivals

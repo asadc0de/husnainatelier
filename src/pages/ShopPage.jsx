@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useProduct } from '../context/ProductContext';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import ImageWithLoader from '../components/ImageWithLoader';
 
 gsap.registerPlugin(ScrollTrigger);
 

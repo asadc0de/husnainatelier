@@ -1,46 +1,64 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import heroBg from '../assets/hero_pastel.png';
-import kurtiImg from '../assets/kurti.png';
-import lehengaImg from '../assets/lehenga.png';
+import { db } from '../firebase';
+import { collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc, query, orderBy } from 'firebase/firestore';
 
 const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
-    // Initial mock data
-    const defaultProducts = [
-        { id: 1, name: 'Emerald Silk Kurta', price: 'Rs. 14,900', image: kurtiImg, category: 'Festive', description: 'A beautiful emerald green silk kurta with intricate embroidery.' },
-        { id: 2, name: 'Noor Lehenga', price: 'Rs. 32,900', image: lehengaImg, category: 'Bridal', description: 'Elegant bridal lehenga with heavy embellishments.' },
-        { id: 3, name: 'Velvet Gown', price: 'Rs. 49,900', image: heroBg, category: 'Modern', description: 'Luxurious velvet gown perfect for evening parties.' },
-        { id: 4, name: 'Sapphire Drape', price: 'Rs. 22,900', image: kurtiImg, category: 'Festive', description: 'Sapphire blue drape with golden borders.' },
-        { id: 101, name: 'Rosewater Mist', price: 'Rs. 1,400', image: lehengaImg, category: 'Accessories', description: 'Fresh rosewater mist for a refreshing glow.' },
-    ];
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const [products, setProducts] = useState(() => {
-        const savedProducts = localStorage.getItem('products');
-        return savedProducts ? JSON.parse(savedProducts) : defaultProducts;
-    });
-
+    // Initial Real-time Listener
     useEffect(() => {
-        localStorage.setItem('products', JSON.stringify(products));
-    }, [products]);
+        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const productsData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setProducts(productsData);
+            setLoading(false);
+        }, (error) => {
+            console.error("Error fetching products from Firebase:", error);
+            // Fallback to empty or local if needed, but for now just log
+            setLoading(false);
+        });
 
-    const addProduct = (newProduct) => {
-        // Generate a simple unique ID
-        const productWithId = { ...newProduct, id: Date.now() };
-        // Add new product to the beginning of the list
-        setProducts(prev => [productWithId, ...prev]);
+        return () => unsubscribe();
+    }, []);
+
+    const addProduct = async (newProduct) => {
+        try {
+            await addDoc(collection(db, 'products'), {
+                ...newProduct,
+                createdAt: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error("Error adding product:", error);
+            alert("Failed to add product. Check console." + (error.message ? " " + error.message : ""));
+        }
     };
 
-    const deleteProduct = (id) => {
-        setProducts(prev => prev.filter(product => product.id !== id));
+    const deleteProduct = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'products', id));
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            alert("Failed to delete product.");
+        }
     };
 
-    const updateProduct = (id, updatedProduct) => {
-        setProducts(prev => prev.map(product => (product.id === id ? { ...updatedProduct, id } : product)));
+    const updateProduct = async (id, updatedProduct) => {
+        try {
+            await updateDoc(doc(db, 'products', id), updatedProduct);
+        } catch (error) {
+            console.error("Error updating product:", error);
+            alert("Failed to update product.");
+        }
     };
 
     return (
-        <ProductContext.Provider value={{ products, addProduct, deleteProduct, updateProduct }}>
+        <ProductContext.Provider value={{ products, addProduct, deleteProduct, updateProduct, loading }}>
             {children}
         </ProductContext.Provider>
     );

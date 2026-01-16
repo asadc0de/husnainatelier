@@ -6,6 +6,7 @@ import heroBg from '../assets/hero_pastel.png';
 import kurtiImg from '../assets/kurti.png';
 import lehengaImg from '../assets/lehenga.png';
 import { useAnimation } from '../context/AnimationContext';
+import ImageWithLoader from './ImageWithLoader';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -69,10 +70,11 @@ const Categories = () => {
                         className="relative group overflow-hidden h-[70vh] md:h-full cursor-pointer block"
                     >
                         {/* Background Image */}
-                        <div
-                            className="absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] ease-out group-hover:scale-110"
-                            style={{ backgroundImage: `url(${col.image})` }}
-                        ></div>
+                        <ImageWithLoader
+                            src={col.image}
+                            alt={col.name}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
+                        />
 
                         {/* Overlay */}
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-500"></div>

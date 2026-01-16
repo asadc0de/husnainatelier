@@ -16,42 +16,47 @@ const BrandStory = () => {
 
     useEffect(() => {
         if (hasPlayedIntro) {
-            gsap.set(textRef.current.children, { y: 0, opacity: 1 });
+            if (textRef.current) {
+                gsap.set(textRef.current.children, { y: 0, opacity: 1 });
+            }
             return;
         }
 
-        // Parallax effect for background (always runs for visual appeal, or can trigger one-time?)
-        // Let's keep parallax always running as it's scroll-bound interaction, not an "intro" animation.
-        // Actually, user said "animation on full landing page first render work".
-        // Usually parallax is fine to keep, but the text fade-in is the "intro".
-        gsap.fromTo(containerRef.current.querySelector('img'),
-            { scale: 1.1 },
-            {
-                scale: 1,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: true
+        // Parallax effect for background
+        const bgImage = containerRef.current?.querySelector('.brand-story-img');
+
+        if (bgImage) {
+            gsap.fromTo(bgImage,
+                { scale: 1.1 },
+                {
+                    scale: 1,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: containerRef.current,
+                        start: "top bottom",
+                        end: "bottom top",
+                        scrub: true
+                    }
                 }
-            }
-        );
+            );
+        }
 
         // Text fade in
-        gsap.fromTo(textRef.current.children,
-            { y: 30, opacity: 0 },
-            {
-                y: 0,
-                opacity: 1,
-                duration: 1,
-                stagger: 0.2,
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top 60%",
+        if (textRef.current) {
+            gsap.fromTo(textRef.current.children,
+                { y: 30, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1,
+                    stagger: 0.2,
+                    scrollTrigger: {
+                        trigger: containerRef.current,
+                        start: "top 60%",
+                    }
                 }
-            }
-        );
+            );
+        }
     }, [hasPlayedIntro]);
 
     return (
@@ -69,7 +74,7 @@ const BrandStory = () => {
                         src={storyBg}
                         alt="Brand Story"
                         loading="lazy"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover brand-story-img"
                     />
                     {/* Dark Overlay for text readability */}
                     <div className="absolute inset-0 bg-black/30"></div>

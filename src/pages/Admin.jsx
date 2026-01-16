@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useProduct } from '../context/ProductContext';
-import { Upload, Minus, Plus, ChevronLeft, ChevronRight, ZoomIn, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { uploadToCloudinary } from '../utils/cloudinaryHelper';
+import { Upload, Minus, Plus, ChevronLeft, ChevronRight, ZoomIn, Edit, Trash2, ArrowLeft, Loader2 } from 'lucide-react';
 
 const Admin = () => {
     const { products, addProduct, updateProduct, deleteProduct } = useProduct();
     const [view, setView] = useState('list'); // 'list' or 'form'
     const [isEditing, setIsEditing] = useState(false);
     const [editId, setEditId] = useState(null);
+    const [uploading, setUploading] = useState(false);
 
     const initialFormState = {
         name: '',
@@ -18,6 +20,11 @@ const Admin = () => {
     };
 
     const [formData, setFormData] = useState(initialFormState);
+    // Store raw files for upload
+    const [files, setFiles] = useState({
+        image: null,
+        additionalImages: [null, null, null]
+    });
 
     const categories = ['Bridal', 'Casual', 'Festive', 'Modern', 'Accessories'];
 
@@ -29,13 +36,21 @@ const Admin = () => {
     const handleImageChange = (e, index) => {
         const file = e.target.files[0];
         if (file) {
+            // Store file for upload
+            if (index === undefined) {
+                setFiles(prev => ({ ...prev, image: file }));
+            } else {
+                const newAddFiles = [...files.additionalImages];
+                newAddFiles[index] = file;
+                setFiles(prev => ({ ...prev, additionalImages: newAddFiles }));
+            }
+
+            // Generate preview
             const reader = new FileReader();
             reader.onloadend = () => {
                 if (index === undefined) {
-                    // Main Image
                     setFormData(prev => ({ ...prev, image: reader.result }));
                 } else {
-                    // Additional Images
                     const newImages = [...formData.additionalImages];
                     newImages[index] = reader.result;
                     setFormData(prev => ({ ...prev, additionalImages: newImages }));
@@ -45,26 +60,61 @@ const Admin = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.name || !formData.price || !formData.image) {
             alert("Please fill in all required fields (Name, Price, Image)");
             return;
         }
 
-        if (isEditing) {
-            updateProduct(editId, formData);
-            alert('Product updated successfully!');
-        } else {
-            addProduct(formData);
-            alert('Product added successfully!');
-        }
+        setUploading(true);
 
-        // Reset and go back to list
-        setFormData(initialFormState);
-        setIsEditing(false);
-        setEditId(null);
-        setView('list');
+        try {
+            let mainImageUrl = formData.image;
+            let additionalImageUrls = formData.additionalImages;
+
+            // Upload Main Image if changed/new
+            if (files.image) {
+                mainImageUrl = await uploadToCloudinary(files.image);
+            }
+
+            // Upload Additional Images if changed/new
+            const newAdditionalUrls = await Promise.all(
+                formData.additionalImages.map(async (img, index) => {
+                    if (files.additionalImages[index]) {
+                        return await uploadToCloudinary(files.additionalImages[index]);
+                    }
+                    return img; // Return existing URL (or empty string)
+                })
+            );
+
+            const finalProduct = {
+                ...formData,
+                image: mainImageUrl,
+                additionalImages: newAdditionalUrls
+            };
+
+            if (isEditing) {
+                await updateProduct(editId, finalProduct);
+                alert('Product updated successfully!');
+            } else {
+                await addProduct(finalProduct);
+                alert('Product added successfully!');
+            }
+
+            // Reset
+            setFormData(initialFormState);
+            setFiles({ image: null, additionalImages: [null, null, null] });
+            setIsEditing(false);
+            setEditId(null);
+            setView('list');
+
+        } catch (error) {
+            console.error("Upload/Save error:", error);
+            alert("Failed to save product. " + error.message);
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleEditClick = (product) => {
@@ -384,9 +434,17 @@ const Admin = () => {
                                     </button>
                                     <button
                                         type="submit"
-                                        className="w-2/3 bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity"
+                                        disabled={uploading}
+                                        className="w-2/3 bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        {isEditing ? 'Save Changes' : 'Publish Product'}
+                                        {uploading ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" />
+                                                {isEditing ? 'Saving...' : 'Publishing...'}
+                                            </>
+                                        ) : (
+                                            isEditing ? 'Save Changes' : 'Publish Product'
+                                        )}
                                     </button>
                                 </div>
                             </form>

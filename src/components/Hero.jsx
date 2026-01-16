@@ -13,22 +13,38 @@ const Hero = () => {
     useEffect(() => {
         if (hasPlayedIntro) {
             // Skip animation if already played
-            gsap.set(heroRef.current, { scale: 1 });
-            gsap.set(textContainerRef.current.children, { y: 0, opacity: 1 });
+            if (heroRef.current) {
+                gsap.set(heroRef.current, { scale: 1 });
+            }
+            if (textContainerRef.current) {
+                gsap.set(textContainerRef.current.children, { y: 0, opacity: 1 });
+            }
             return;
         }
 
         const tl = gsap.timeline();
 
-        tl.fromTo(heroRef.current,
-            { scale: 1.1 },
-            { scale: 1, duration: 2, ease: "power2.out" }
-        )
-            .fromTo(textContainerRef.current.children,
+        if (heroRef.current) {
+            tl.fromTo(heroRef.current,
+                { scale: 1.1 },
+                { scale: 1, duration: 2, ease: "power2.out" }
+            );
+        }
+
+        if (textContainerRef.current) {
+            tl.fromTo(textContainerRef.current.children,
                 { y: 30, opacity: 0 },
-                { y: 0, opacity: 1, duration: 1.2, stagger: 0.2, ease: "power3.out" },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1.2,
+                    stagger: 0.2,
+                    ease: "power3.out",
+                    onComplete: () => setHasPlayedIntro(true)
+                },
                 "-=1.5"
             );
+        }
     }, [hasPlayedIntro, setHasPlayedIntro]);
 
     return (

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useProduct } from '../context/ProductContext';
 import { uploadToCloudinary } from '../utils/cloudinaryHelper';
-import { Upload, Minus, Plus, ChevronLeft, ChevronRight, ZoomIn, Edit, Trash2, ArrowLeft, Loader2 } from 'lucide-react';
+import { Upload, Minus, Plus, ChevronLeft, ChevronRight, ZoomIn, Edit, Trash2, ArrowLeft, Loader2, Move, Crop } from 'lucide-react';
+import Toast from '../components/Toast';
 
 const Admin = () => {
     const { products, addProduct, updateProduct, deleteProduct, loading } = useProduct();
@@ -9,123 +10,226 @@ const Admin = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editId, setEditId] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [toast, setToast] = useState(null); // { message, type }
+
+    // Unified Image State
+    // Structure: { id: string, url: string, file: File | null, position: { x: 50, y: 50 } }
+    const [productImages, setProductImages] = useState([
+        { id: 'img-0', url: '', file: null, position: { x: 50, y: 50 } },
+        { id: 'img-1', url: '', file: null, position: { x: 50, y: 50 } },
+        { id: 'img-2', url: '', file: null, position: { x: 50, y: 50 } },
+        { id: 'img-3', url: '', file: null, position: { x: 50, y: 50 } }
+    ]);
+
+    // Drag & Drop State
+    const [draggedIndex, setDraggedIndex] = useState(null);
+
+    // Positioning State
+    const [adjustingIndex, setAdjustingIndex] = useState(null); // Index of image being adjusted
+    const isDraggingPosition = useRef(false);
+    const startPos = useRef({ x: 0, y: 0 });
 
     const initialFormState = {
         name: '',
         price: 'Rs. ',
         description: '',
         category: 'Bridal',
-        image: '',
-        additionalImages: ['', '', '']
     };
 
     const [formData, setFormData] = useState(initialFormState);
-    // Store raw files for upload
-    const [files, setFiles] = useState({
-        image: null,
-        additionalImages: [null, null, null]
-    });
-
     const categories = ['Bridal', 'Casual', 'Festive', 'Modern', 'Accessories'];
+
+    // --- FORM HANDLERS ---
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         let newValue = value;
 
         if (name === 'name') {
-            // Capitalize first letter of every word
             newValue = value.replace(/\b\w/g, (char) => char.toUpperCase());
         }
 
         if (name === 'price') {
-            // Ensure "Rs. " prefix is always present
             if (!value.startsWith('Rs. ')) {
                 newValue = 'Rs. ' + value.replace(/^Rs\.\s?/, '');
             }
         }
 
+        // Enforce first letter capital only for Description
+        if (name === 'description' && value.length > 0) {
+            newValue = value.charAt(0).toUpperCase() + value.slice(1);
+        }
+
         setFormData(prev => ({ ...prev, [name]: newValue }));
     };
 
-    const handleImageChange = (e, index) => {
+    // --- IMAGE HANDLERS ---
+
+    const handleImageUpload = (e, index) => {
         const file = e.target.files[0];
         if (file) {
-            // Store file for upload
-            if (index === undefined) {
-                setFiles(prev => ({ ...prev, image: file }));
-            } else {
-                const newAddFiles = [...files.additionalImages];
-                newAddFiles[index] = file;
-                setFiles(prev => ({ ...prev, additionalImages: newAddFiles }));
-            }
-
-            // Generate preview
             const reader = new FileReader();
             reader.onloadend = () => {
-                if (index === undefined) {
-                    setFormData(prev => ({ ...prev, image: reader.result }));
-                } else {
-                    const newImages = [...formData.additionalImages];
-                    newImages[index] = reader.result;
-                    setFormData(prev => ({ ...prev, additionalImages: newImages }));
-                }
+                setProductImages(prev => {
+                    const newImages = [...prev];
+                    newImages[index] = {
+                        ...newImages[index],
+                        url: reader.result,
+                        file: file,
+                        position: { x: 50, y: 50 } // Reset position on new upload
+                    };
+                    return newImages;
+                });
             };
             reader.readAsDataURL(file);
         }
     };
 
+    const removeImage = (index) => {
+        setProductImages(prev => {
+            const newImages = [...prev];
+            newImages[index] = { ...newImages[index], url: '', file: null, position: { x: 50, y: 50 } };
+            return newImages;
+        });
+    };
+
+    // --- DRAG AND DROP HANDLERS (REORDERING) ---
+
+    const handleDragStart = (e, index) => {
+        setDraggedIndex(index);
+        // Required for Firefox
+        e.dataTransfer.effectAllowed = "move";
+    };
+
+    const handleDragOver = (e, index) => {
+        e.preventDefault(); // Necessary to allow dropping
+        e.dataTransfer.dropEffect = "move";
+    };
+
+    const handleDrop = (e, index) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === index) return;
+
+        setProductImages(prev => {
+            const newImages = [...prev];
+            const draggedItem = newImages[draggedIndex];
+            newImages.splice(draggedIndex, 1);
+            newImages.splice(index, 0, draggedItem);
+            return newImages;
+        });
+        setDraggedIndex(null);
+    };
+
+    // --- POSITIONING HANDLERS (PANNING) ---
+
+    const toggleAdjustMode = (e, index) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (adjustingIndex === index) {
+            setAdjustingIndex(null); // Exit adjust mode
+        } else {
+            setAdjustingIndex(index); // Enter adjust mode
+        }
+    };
+
+    const handleMouseDown = (e, index) => {
+        if (adjustingIndex !== index) return;
+        isDraggingPosition.current = true;
+        startPos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleMouseMove = (e, index) => {
+        if (!isDraggingPosition.current || adjustingIndex !== index) return;
+
+        const dx = e.clientX - startPos.current.x;
+        const dy = e.clientY - startPos.current.y;
+
+        startPos.current = { x: e.clientX, y: e.clientY }; // Update start pos for next delta
+
+        setProductImages(prev => {
+            const newImages = [...prev];
+            const img = newImages[index];
+
+            // Sensitivity factor - smaller means finer control
+            const sensitivity = 0.2;
+
+            let newX = img.position.x - (dx * sensitivity);
+            let newY = img.position.y - (dy * sensitivity);
+
+            // Clamp between 0 and 100
+            newX = Math.max(0, Math.min(100, newX));
+            newY = Math.max(0, Math.min(100, newY));
+
+            newImages[index] = {
+                ...img,
+                position: { x: newX, y: newY }
+            };
+            return newImages;
+        });
+    };
+
+    const handleMouseUp = () => {
+        isDraggingPosition.current = false;
+    };
+
+    // Global mouse up to catch drags that leave the container
+    useEffect(() => {
+        window.addEventListener('mouseup', handleMouseUp);
+        return () => window.removeEventListener('mouseup', handleMouseUp);
+    }, []);
+
+
+    // --- CRUD ---
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.name || !formData.price || !formData.image) {
-            alert("Please fill in all required fields (Name, Price, Image)");
+        // Validation: Ensure at least one image (the main one at index 0)
+        if (!formData.name || !formData.price || !productImages[0].url) {
+            setToast({ message: "Please fill in Name, Price, and at least the Main Image.", type: 'error' });
             return;
         }
 
         setUploading(true);
 
         try {
-            let mainImageUrl = formData.image;
-            let additionalImageUrls = formData.additionalImages;
+            // Upload all new files
+            const uploadedImages = await Promise.all(productImages.map(async (imgObj) => {
+                if (imgObj.file) {
+                    // Upload new file
+                    const secureUrl = await uploadToCloudinary(imgObj.file);
+                    return { ...imgObj, url: secureUrl, file: null }; // Clear file after upload
+                }
+                return imgObj; // Keep existing info
+            }));
 
-            // Upload Main Image if changed/new
-            if (files.image) {
-                mainImageUrl = await uploadToCloudinary(files.image);
-            }
-
-            // Upload Additional Images if changed/new
-            const newAdditionalUrls = await Promise.all(
-                formData.additionalImages.map(async (img, index) => {
-                    if (files.additionalImages[index]) {
-                        return await uploadToCloudinary(files.additionalImages[index]);
-                    }
-                    return img; // Return existing URL (or empty string)
-                })
-            );
+            // Structuring for database
+            const mainImageObj = uploadedImages[0];
+            const additionalImagesObjs = uploadedImages.slice(1);
 
             const finalProduct = {
                 ...formData,
-                image: mainImageUrl,
-                additionalImages: newAdditionalUrls
+                image: mainImageObj.url,
+                additionalImages: additionalImagesObjs.map(obj => obj.url),
+                // NEW: Save positioning data
+                imagePositions: {
+                    main: mainImageObj.position,
+                    additional: additionalImagesObjs.map(obj => obj.position)
+                }
             };
 
             if (isEditing) {
                 await updateProduct(editId, finalProduct);
-                alert('Product updated successfully!');
+                setToast({ message: 'Product updated successfully!', type: 'success' });
             } else {
                 await addProduct(finalProduct);
-                alert('Product added successfully!');
+                setToast({ message: 'Product added successfully!', type: 'success' });
             }
 
-            // Reset
-            setFormData(initialFormState);
-            setFiles({ image: null, additionalImages: [null, null, null] });
-            setIsEditing(false);
-            setEditId(null);
-            setView('list');
+            handleBackClick(true); // Reset form without confirmation
 
         } catch (error) {
             console.error("Upload/Save error:", error);
-            alert("Failed to save product. " + error.message);
+            setToast({ message: "Failed to save product. " + error.message, type: 'error' });
         } finally {
             setUploading(false);
         }
@@ -137,9 +241,37 @@ const Admin = () => {
             price: product.price,
             description: product.description || '',
             category: product.category,
-            image: product.image,
-            additionalImages: product.additionalImages || ['', '', '']
         });
+
+        // Hydrate images state
+        const loadedImages = [];
+
+        // 1. Main Image
+        loadedImages.push({
+            id: 'main-' + Date.now(),
+            url: product.image,
+            file: null,
+            position: product.imagePositions?.main || { x: 50, y: 50 }
+        });
+
+        // 2. Additional Images
+        const adds = product.additionalImages || ['', '', ''];
+        adds.forEach((url, i) => {
+            loadedImages.push({
+                id: `add-${i}-` + Date.now(),
+                url: url || '',
+                file: null,
+                position: product.imagePositions?.additional?.[i] || { x: 50, y: 50 }
+            });
+        });
+
+        // Ensure we always have 4 slots (1 main + 3 additional)
+        while (loadedImages.length < 4) {
+            loadedImages.push({ id: `empty-${loadedImages.length}`, url: '', file: null, position: { x: 50, y: 50 } });
+        }
+
+        setProductImages(loadedImages.slice(0, 4)); // Force max 4 for now
+
         setEditId(product.id);
         setIsEditing(true);
         setView('form');
@@ -153,21 +285,36 @@ const Admin = () => {
 
     const handleAddNewClick = () => {
         setFormData(initialFormState);
+        setProductImages([
+            { id: 'img-0', url: '', file: null, position: { x: 50, y: 50 } },
+            { id: 'img-1', url: '', file: null, position: { x: 50, y: 50 } },
+            { id: 'img-2', url: '', file: null, position: { x: 50, y: 50 } },
+            { id: 'img-3', url: '', file: null, position: { x: 50, y: 50 } }
+        ]);
         setIsEditing(false);
         setEditId(null);
         setView('form');
     };
 
-    const handleBackClick = () => {
-        if (window.confirm('Unsaved changes will be lost. Go back?')) {
-            setView('list');
-            setFormData(initialFormState);
-            setIsEditing(false);
-        }
+    const handleBackClick = (force = false) => {
+        // If force is true, skip confirmation. Otherwise check for unsaved changes.
+        if (!force && view === 'form' && !window.confirm('Discard changes?')) return;
+
+        setView('list');
+        setFormData(initialFormState);
+        setProductImages([
+            { id: 'img-0', url: '', file: null, position: { x: 50, y: 50 } },
+            { id: 'img-1', url: '', file: null, position: { x: 50, y: 50 } },
+            { id: 'img-2', url: '', file: null, position: { x: 50, y: 50 } },
+            { id: 'img-3', url: '', file: null, position: { x: 50, y: 50 } }
+        ]);
+        setIsEditing(false);
+        setAdjustingIndex(null);
     };
 
     return (
         <div className="min-h-screen pt-32 pb-16 container mx-auto px-6 md:px-12 bg-[#FFF7E4]">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             {/* Header */}
             <div className="flex justify-between items-center mb-12">
                 {view === 'list' ? (
@@ -191,7 +338,7 @@ const Admin = () => {
                         <h1 className="font-serif text-3xl md:text-4xl text-black">
                             {isEditing ? 'Edit Product' : 'Add New Product'}
                         </h1>
-                        <div className="w-40"></div> {/* Spacer for balance */}
+                        <div className="w-40"></div>
                     </>
                 )}
             </div>
@@ -211,27 +358,13 @@ const Admin = () => {
                         </thead>
                         <tbody>
                             {loading ? (
-                                // Loading Skeleton Rows
                                 Array.from({ length: 5 }).map((_, index) => (
                                     <tr key={`skeleton-${index}`} className="border-b border-gray-100">
-                                        <td className="p-2 pl-3">
-                                            <div className="w-10 h-12 bg-gray-400 rounded-sm animate-pulse"></div>
-                                        </td>
-                                        <td className="p-3">
-                                            <div className="h-4 w-32 bg-gray-400 rounded animate-pulse"></div>
-                                        </td>
-                                        <td className="p-3">
-                                            <div className="h-3 w-20 bg-gray-400 rounded animate-pulse"></div>
-                                        </td>
-                                        <td className="p-3">
-                                            <div className="h-4 w-16 bg-gray-400 rounded animate-pulse"></div>
-                                        </td>
-                                        <td className="p-3 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <div className="w-8 h-8 bg-gray-400 rounded animate-pulse"></div>
-                                                <div className="w-8 h-8 bg-gray-400 rounded animate-pulse"></div>
-                                            </div>
-                                        </td>
+                                        <td className="p-2 pl-3"><div className="w-10 h-12 bg-gray-400 rounded-sm animate-pulse"></div></td>
+                                        <td className="p-3"><div className="h-4 w-32 bg-gray-400 rounded animate-pulse"></div></td>
+                                        <td className="p-3"><div className="h-3 w-20 bg-gray-400 rounded animate-pulse"></div></td>
+                                        <td className="p-3"><div className="h-4 w-16 bg-gray-400 rounded animate-pulse"></div></td>
+                                        <td className="p-3 text-right"><div className="flex justify-end gap-2"><div className="w-8 h-8 bg-gray-400 rounded animate-pulse"></div></div></td>
                                     </tr>
                                 ))
                             ) : products.length > 0 ? (
@@ -242,8 +375,13 @@ const Admin = () => {
                                         onClick={() => handleEditClick(product)}
                                     >
                                         <td className="p-2 pl-3">
-                                            <div className="w-10 h-12 bg-gray-400 overflow-hidden rounded-sm">
-                                                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                                            <div className="w-10 h-12 bg-gray-400 overflow-hidden rounded-sm relative">
+                                                <img
+                                                    src={product.image}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-cover"
+                                                    style={{ objectPosition: `${product.imagePositions?.main?.x || 50}% ${product.imagePositions?.main?.y || 50}%` }}
+                                                />
                                             </div>
                                         </td>
                                         <td className="p-3 font-medium text-sm text-gray-800">{product.name}</td>
@@ -251,18 +389,10 @@ const Admin = () => {
                                         <td className="p-3 font-serif text-sm text-gray-800">{product.price}</td>
                                         <td className="p-3 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleEditClick(product); }}
-                                                    className="p-1.5 text-gray-400 hover:text-black hover:bg-gray-400 rounded-md transition-all"
-                                                    title="Edit"
-                                                >
+                                                <button onClick={(e) => { e.stopPropagation(); handleEditClick(product); }} className="p-1.5 text-gray-400 hover:text-black hover:bg-gray-400 rounded-md transition-all">
                                                     <Edit size={16} />
                                                 </button>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleDeleteClick(product.id); }}
-                                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all"
-                                                    title="Delete"
-                                                >
+                                                <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(product.id); }} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
@@ -271,9 +401,7 @@ const Admin = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="p-8 text-center text-gray-400 font-serif italic text-sm">
-                                        No products found. Click "Add New Product" to start.
-                                    </td>
+                                    <td colSpan="5" className="p-8 text-center text-gray-400 font-serif italic text-sm">No products found.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -289,70 +417,50 @@ const Admin = () => {
                     <div className="w-full lg:w-1/2 border border-gray-200 p-4 bg-white shadow-sm relative sticky top-32 self-start">
                         <div className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 uppercase tracking-widest pointer-events-none z-10">Live Preview</div>
 
-                        {/* Preview Image Gallery Logic */}
+                        {/* Main Image Preview */}
                         <div className="w-full">
-                            <div className="h-[580px] w-full bg-gray-400 mb-[1px] overflow-hidden relative group">
-                                {formData.image ? (
+                            <div className="h-[580px] w-full bg-gray-100 mb-[1px] overflow-hidden relative group">
+                                {productImages[0]?.url ? (
                                     <img
-                                        src={formData.image}
+                                        src={productImages[0].url}
                                         alt="Product Preview"
-                                        className="h-full w-full object-cover"
+                                        className="h-full w-full object-cover transition-all duration-300"
+                                        style={{
+                                            objectPosition: `${productImages[0].position.x}% ${productImages[0].position.y}%`,
+                                            transform: adjustingIndex === 0 ? 'scale(1.05)' : 'scale(1)'
+                                        }}
                                     />
                                 ) : (
-                                    <div className="h-full w-full flex items-center justify-center text-gray-400 bg-gray-50 uppercase tracking-widest text-sm">
-                                        No Image Selected
-                                    </div>
-                                )}
-                                {/* Visual Mockups */}
-                                {formData.image && (
-                                    <>
-                                        <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm p-2 rounded-full">
-                                            <ZoomIn size={20} className="text-white" />
-                                        </div>
-                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-2 z-10">
-                                            <ChevronLeft size={32} />
-                                        </div>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-2 z-10">
-                                            <ChevronRight size={32} />
-                                        </div>
-                                    </>
+                                    <div className="h-full w-full flex items-center justify-center text-gray-400 bg-gray-50 uppercase tracking-widest text-sm">Main Image</div>
                                 )}
                             </div>
-                            {/* Live Thumbnails Preview */}
+
+                            {/* Thumbnails */}
                             <div className="grid grid-cols-4 gap-[1px]">
-                                {[formData.image, ...formData.additionalImages].slice(0, 4).map((img, i) => (
-                                    <div key={i} className={`aspect-square bg-gray-400 border-b-2 ${i === 0 ? 'border-primary opacity-100' : 'border-transparent opacity-60'}`}>
-                                        {img ? (
-                                            <img src={img} className="w-full h-full object-cover" alt={`thumb-${i}`} />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px] bg-gray-50">
-                                                Empty
-                                            </div>
+                                {productImages.slice(0, 4).map((img, i) => (
+                                    <div key={img.id} className={`aspect-square bg-gray-100 overflow-hidden border-b-2 ${i === 0 ? 'border-primary' : 'border-transparent'}`}>
+                                        {img.url && (
+                                            <img
+                                                src={img.url}
+                                                className="w-full h-full object-cover"
+                                                alt={`thumb-${i}`}
+                                                style={{ objectPosition: `${img.position.x}% ${img.position.y}%` }}
+                                            />
                                         )}
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Preview Details */}
+                        {/* Details Preview */}
                         <div className="mt-8 px-4">
                             <div className="flex justify-between items-start mb-8">
-                                <h1 className="font-serif text-4xl md:text-5xl text-primary break-words max-w-[70%]">
-                                    {formData.name || 'Product Name'}
-                                </h1>
-                                <span className="font-serif text-2xl text-gray-500">
-                                    {formData.price || 'Rs. 0.00'}
-                                </span>
+                                <h1 className="font-serif text-4xl md:text-5xl text-primary break-words max-w-[70%]">{formData.name || 'Name'}</h1>
+                                <span className="font-serif text-2xl text-gray-500">{formData.price}</span>
                             </div>
-
                             <div className="border-t border-gray-100 py-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-sm font-bold text-primary">Description</h3>
-                                    <Minus size={16} />
-                                </div>
-                                <div className="text-sm text-gray-500 font-sans leading-relaxed space-y-4 whitespace-pre-line">
-                                    {formData.description || 'Product description will appear here...'}
-                                </div>
+                                <h3 className="text-sm font-bold text-primary mb-4">Description</h3>
+                                <p className="text-sm text-gray-500 font-sans leading-relaxed whitespace-pre-line first-letter:uppercase">{formData.description || '...'}</p>
                             </div>
                         </div>
                     </div>
@@ -362,127 +470,126 @@ const Admin = () => {
                         <div className="bg-white p-8 md:p-12 shadow-sm border border-gray-100">
                             <h2 className="font-serif text-2xl mb-8">{isEditing ? 'Update Product' : 'Create Product'}</h2>
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Name */}
                                 <div>
                                     <label className="block font-serif text-lg mb-2">Product Name *</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none capitalize"
-                                        placeholder="e.g. Emerald Silk Kurta"
-                                        required
-                                    />
+                                    <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none capitalize" required />
                                 </div>
-
-                                {/* Price */}
                                 <div>
                                     <label className="block font-serif text-lg mb-2">Price *</label>
-                                    <input
-                                        type="text"
-                                        name="price"
-                                        value={formData.price}
-                                        onChange={handleChange}
-                                        className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none"
-                                        placeholder="e.g. Rs. 14,900"
-                                        required
-                                    />
+                                    <input type="text" name="price" value={formData.price} onChange={handleChange} className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none" required />
                                 </div>
-
-                                {/* Category */}
                                 <div>
                                     <label className="block font-serif text-lg mb-2">Category *</label>
-                                    <select
-                                        name="category"
-                                        value={formData.category}
-                                        onChange={handleChange}
-                                        className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none bg-white"
-                                    >
-                                        {categories.map(cat => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
+                                    <select name="category" value={formData.category} onChange={handleChange} className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none bg-white">
+                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
-
-                                {/* Description */}
                                 <div>
                                     <label className="block font-serif text-lg mb-2">Description</label>
-                                    <textarea
-                                        name="description"
-                                        value={formData.description}
-                                        onChange={handleChange}
-                                        rows="6"
-                                        className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none resize-none"
-                                        placeholder="Enter full product description..."
-                                    ></textarea>
+                                    <textarea name="description" value={formData.description} onChange={handleChange} rows="6" className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none resize-none"></textarea>
                                 </div>
 
-                                {/* Image Upload */}
+                                {/* DRAG AND DROP IMAGE REORDERING & UPLOAD */}
                                 <div>
-                                    <label className="block font-serif text-lg mb-2">Product Images *</label>
-                                    {/* Main Image */}
-                                    <div className="border-2 border-dashed border-gray-300 p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors relative h-64">
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => handleImageChange(e)}
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                                        />
-                                        {formData.image ? (
-                                            <img src={formData.image} alt="Preview" className="absolute inset-0 w-full h-full object-cover z-10" />
-                                        ) : (
-                                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                                <Upload size={32} className="mb-2" />
-                                                <span className="font-sans text-sm tracking-widest uppercase">Upload Main Image</span>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <label className="block font-serif text-lg mb-4">Product Images (Drag to Reorder) *</label>
 
-                                    {/* Additional Images */}
-                                    <div className="grid grid-cols-3 gap-4 mt-4">
-                                        {formData.additionalImages.map((img, index) => (
-                                            <div key={index} className="border-2 border-dashed border-gray-300 relative aspect-square cursor-pointer hover:bg-gray-50 transition-colors">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(e) => handleImageChange(e, index)}
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                                                />
-                                                {img ? (
-                                                    <img src={img} alt={`Sub ${index}`} className="absolute inset-0 w-full h-full object-cover z-10" />
-                                                ) : (
-                                                    <div className="absolute inset-0 flex items-center justify-center text-gray-300">
-                                                        <Plus size={24} />
+                                    <div className="grid grid-cols-3 gap-4 select-none">
+                                        {productImages.map((image, index) => (
+                                            <div
+                                                key={image.id}
+                                                draggable={!adjustingIndex} // Disable drag if adjusting
+                                                onDragStart={(e) => handleDragStart(e, index)}
+                                                onDragOver={(e) => handleDragOver(e, index)}
+                                                onDrop={(e) => handleDrop(e, index)}
+                                                className={`
+                                                    relative aspect-square border-2 border-dashed border-gray-300
+                                                    transition-all duration-300 bg-gray-50 group
+                                                    ${draggedIndex === index ? 'opacity-50 border-black' : ''}
+                                                    ${adjustingIndex === index ? 'ring-2 ring-blue-500 z-10 scale-105 shadow-xl cursor-move' : 'hover:border-gray-400'}
+                                                    ${index === 0 ? 'col-span-3 aspect-[21/9]' : ''}
+                                                `}
+                                                onMouseDown={(e) => adjustingIndex === index && handleMouseDown(e, index)}
+                                                onMouseMove={(e) => adjustingIndex === index && handleMouseMove(e, index)}
+                                            >
+                                                {/* Image Content */}
+                                                {image.url ? (
+                                                    <div className="w-full h-full relative overflow-hidden">
+                                                        <img
+                                                            src={image.url}
+                                                            alt="Preview"
+                                                            className={`w-full h-full object-cover pointer-events-none transition-transform duration-200`}
+                                                            style={{
+                                                                objectPosition: `${image.position.x}% ${image.position.y}%`,
+                                                                transform: adjustingIndex === index ? 'scale(1.2)' : 'scale(1)'
+                                                            }}
+                                                        />
+
+                                                        {/* Tools Overlay */}
+                                                        <div className={`absolute top-2 right-2 flex gap-2 z-30 ${adjustingIndex === index ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                                                            {/* Adjust Position Tool */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => toggleAdjustMode(e, index)}
+                                                                className={`p-2 rounded-full shadow-sm text-white transition-colors ${adjustingIndex === index ? 'bg-blue-600' : 'bg-black/50 hover:bg-black'}`}
+                                                                title="Adjust Position (Pan)"
+                                                            >
+                                                                {adjustingIndex === index ? <Crop size={16} /> : <Move size={16} />}
+                                                            </button>
+
+                                                            {/* Delete Tool (only if not adjusting) */}
+                                                            {adjustingIndex !== index && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeImage(index)}
+                                                                    className="p-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full shadow-sm"
+                                                                    title="Remove Image"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Adjust Mode Hint */}
+                                                        {adjustingIndex === index && (
+                                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                                <div className="bg-black/70 text-white text-[10px] px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-sm">
+                                                                    Drag to Pan
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
+                                                ) : (
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none">
+                                                        <Upload size={index === 0 ? 32 : 24} className="mb-2" />
+                                                        <span className="text-xs font-bold uppercase tracking-widest text-center">
+                                                            {index === 0 ? 'Main Image' : `Image ${index + 1}`}
+                                                        </span>
+                                                        <span className="text-[10px] mt-1 text-gray-400">Drag to Order</span>
+                                                    </div>
+                                                )}
+
+                                                {/* File Input (Hidden, covers area if no image or standard mode) */}
+                                                {!adjustingIndex && (
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(e) => handleImageUpload(e, index)}
+                                                        className={`absolute inset-0 w-full h-full opacity-0 cursor-pointer ${image.url ? 'z-0' : 'z-20'}`}
+                                                        title="Click to Upload"
+                                                    />
                                                 )}
                                             </div>
                                         ))}
                                     </div>
+                                    <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-wide">
+                                        * Drag boxes to reorder. Click <Move size={10} className="inline mx-1" /> to adjust crop.
+                                    </p>
                                 </div>
 
-                                {/* Submit */}
-                                <div className="flex gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={handleBackClick}
-                                        className="w-1/3 bg-white text-black border border-gray-300 py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={uploading}
-                                        className="w-2/3 bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {uploading ? (
-                                            <>
-                                                <Loader2 size={16} className="animate-spin" />
-                                                {isEditing ? 'Saving...' : 'Publishing...'}
-                                            </>
-                                        ) : (
-                                            isEditing ? 'Save Changes' : 'Publish Product'
-                                        )}
+                                <div className="flex gap-4 pt-4 border-t border-gray-100">
+                                    <button type="button" onClick={handleBackClick} className="w-1/3 bg-white text-black border border-gray-300 py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors">Cancel</button>
+                                    <button type="submit" disabled={uploading} className="w-2/3 bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50">
+                                        {uploading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : (isEditing ? 'Save Changes' : 'Publish Product')}
                                     </button>
                                 </div>
                             </form>

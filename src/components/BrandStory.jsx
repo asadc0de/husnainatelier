@@ -87,7 +87,7 @@ const BrandStory = () => {
                             Refined craftsmanship meeting <br />
                             <span className="italic">contemporary silhouettes.</span>
                         </h2>
-                        <Link to="/shop" className="px-10 py-4 bg-white text-black uppercase tracking-widest text-xs font-bold hover:bg-secondary hover:text-white transition-all duration-300 inline-block">
+                        <Link to="/shop" className="px-10 py-4 bg-white text-black uppercase tracking-widest text-xs font-bold hover:bg-gray-200 transition-all duration-300 inline-block">
                             Shop
                         </Link>
                     </div>

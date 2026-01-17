@@ -90,6 +90,23 @@ const ProductDetails = () => {
         ];
     }
 
+    // Helper to safely get position
+    const getPosition = (index) => {
+        if (!currentProduct?.imagePositions) return '50% 50%';
+
+        let pos = { x: 50, y: 50 };
+        if (index === 0) {
+            pos = currentProduct.imagePositions.main || pos;
+        } else {
+            // Adjust index for additional images array (index 1 maps to additional[0])
+            const addIndex = index - 1;
+            if (currentProduct.imagePositions.additional && currentProduct.imagePositions.additional[addIndex]) {
+                pos = currentProduct.imagePositions.additional[addIndex];
+            }
+        }
+        return `${pos.x}% ${pos.y}%`;
+    };
+
     const nextImage = (e) => {
         e?.stopPropagation();
         setSelectedImage((prev) => (prev + 1) % images.length);
@@ -100,7 +117,9 @@ const ProductDetails = () => {
         setSelectedImage((prev) => (prev - 1 + images.length) % images.length);
     };
 
-    const relatedProducts = products.filter(p => p.id != id).slice(0, 3);
+    const relatedProducts = products
+        .filter(p => p.category === currentProduct.category && p.id != id)
+        .slice(0, 4);
 
     return (
         <>
@@ -149,7 +168,8 @@ const ProductDetails = () => {
                                 src={images[selectedImage]}
                                 alt="Product Main"
                                 loading="lazy"
-                                className="h-full w-full object-cover cursor-zoom-in"
+                                className="h-full w-full object-cover cursor-zoom-in transition-all duration-300"
+                                style={{ objectPosition: getPosition(selectedImage) }}
                                 onClick={() => setIsZoomOpen(true)}
                             />
 
@@ -179,7 +199,13 @@ const ProductDetails = () => {
                                     className={`aspect-square bg-gray-100 cursor-pointer overflow-hidden border-b-2 transition-all ${selectedImage === index ? 'border-primary opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
                                     onClick={() => setSelectedImage(index)}
                                 >
-                                    <ImageWithLoader src={img} alt={`Thumbnail ${index}`} loading="lazy" className="w-full h-full object-cover" />
+                                    <ImageWithLoader
+                                        src={img}
+                                        alt={`Thumbnail ${index}`}
+                                        loading="lazy"
+                                        className="w-full h-full object-cover"
+                                        style={{ objectPosition: getPosition(index) }}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -244,7 +270,7 @@ const ProductDetails = () => {
             <div className="w-full">
                 <div className="pt-16 border-t border-gray-100">
                     <h3 className="font-serif text-3xl text-center mb-12">You May Also Like</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-[1px]">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px]">
                         {relatedProducts.map((product) => (
                             <div key={product.id} className="group cursor-pointer block">
                                 <div className="relative overflow-hidden aspect-[4/5] mb-6 bg-gray-100">

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { ChevronRight, Minus, Plus, ChevronLeft, ZoomIn, X } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -121,10 +122,25 @@ const ProductDetails = () => {
         .filter(p => p.category === currentProduct.category && p.id != id)
         .slice(0, 4);
 
+    const handleBuyNow = () => {
+        const message = `Hi, I am interested in buying: ${currentProduct.name} - ${currentProduct.price}.\nLink: ${window.location.href}\nIs it available?`;
+        const url = `https://wa.me/923150676136?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <>
+            <Helmet>
+                <title>{currentProduct.name} | Husnain Atelier</title>
+                <meta property="og:title" content={currentProduct.name} />
+                <meta property="og:description" content={`Price: ${currentProduct.price}`} />
+                <meta property="og:image" content={currentProduct.image} />
+                <meta property="og:url" content={window.location.href} />
+                <meta property="og:type" content="product" />
+            </Helmet>
+
             {/* Zoom Overlay */}
-            {isZoomOpen && (
+            {isZoomOpen && (//...
                 <div className="fixed inset-0 z-[100] bg-black/95 flex justify-center items-center" onClick={() => setIsZoomOpen(false)}>
                     {/* Close Button */}
                     <button className="absolute top-8 right-8 text-white hover:text-gray-300 transition-colors">
@@ -226,7 +242,10 @@ const ProductDetails = () => {
                             >
                                 Add to Cart
                             </button>
-                            <button className="flex-1 bg-white text-black border border-black py-4 text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors cursor-pointer">
+                            <button
+                                onClick={handleBuyNow}
+                                className="flex-1 bg-white text-black border border-black py-4 text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors cursor-pointer"
+                            >
                                 Buy Now
                             </button>
                         </div>

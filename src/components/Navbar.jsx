@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Menu, X, ShoppingBag, ChevronDown } from 'lucide-react';
 import { gsap } from 'gsap';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useCart } from '../context/CartContext';
 import { useSearch } from '../context/SearchContext';
 import logo from '../assets/logo.png';
@@ -72,7 +74,7 @@ const Navbar = () => {
                             onMouseLeave={() => setIsShopOpen(false)}
                         >
                             <Link
-                                to="/shop"
+                                href="/shop"
                                 className={`font-sans text-sm uppercase tracking-[0.2em] font-medium hover:opacity-70 transition-opacity py-4 flex items-center gap-2 cursor-pointer ${textColorClass}`}
                             >
                                 Shop <ChevronDown size={14} className={`transition-transform duration-300 ${isShopOpen ? 'rotate-180' : ''}`} />
@@ -81,10 +83,10 @@ const Navbar = () => {
                             {/* Dropdown */}
                             <div className={`absolute left-0 top-full pt-4 min-w-[200px] z-[100] ${isShopOpen ? 'block' : 'hidden'}`}>
                                 <div className="bg-white text-black p-6 flex flex-col gap-4 shadow-xl border border-gray-100">
-                                    <Link to="/category/bridal" className="font-serif text-lg hover:text-gray-500 transition-colors">Bridal</Link>
-                                    <Link to="/category/casual" className="font-serif text-lg hover:text-gray-500 transition-colors">Casual</Link>
-                                    <Link to="/category/festive" className="font-serif text-lg hover:text-gray-500 transition-colors">Festive</Link>
-                                    <Link to="/category/modern" className="font-serif text-lg hover:text-gray-500 transition-colors">Modern</Link>
+                                    <Link href="/category/bridal" className="font-serif text-lg hover:text-gray-500 transition-colors">Bridal</Link>
+                                    <Link href="/category/casual" className="font-serif text-lg hover:text-gray-500 transition-colors">Casual</Link>
+                                    <Link href="/category/festive" className="font-serif text-lg hover:text-gray-500 transition-colors">Festive</Link>
+                                    <Link href="/category/modern" className="font-serif text-lg hover:text-gray-500 transition-colors">Modern</Link>
                                 </div>
                             </div>
                         </div>
@@ -92,9 +94,9 @@ const Navbar = () => {
 
                     {/* Center: HA Logo */}
                     <div className="flex-1 text-center flex justify-center">
-                        <Link to="/" className="hover:opacity-70 transition-opacity block">
+                        <Link href="/" className="hover:opacity-70 transition-opacity block">
                             <img
-                                src={logo}
+                                src={logo.src}
                                 alt="Husnain Atelier"
                                 className={`h-8 w-auto transition-all duration-300 ${!isScrolled && isWhiteText ? 'invert' : ''}`}
                             />

@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+    /* Fonts */
+    --font-serif: "Olivera", sans-serif;
+    --font-sans: "Lato", sans-serif;
+
+    /* Colors */
+    --color-primary: #000000;
+    --color-secondary: #d3cbb8;
+}
+
+body {
+    background-color: #FFF7E4;
+}

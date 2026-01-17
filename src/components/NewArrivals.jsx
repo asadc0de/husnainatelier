@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useAnimation } from '../context/AnimationContext';
 import { useProduct } from '../context/ProductContext'; // Import context
 import ImageWithLoader from '../components/ImageWithLoader';
@@ -62,7 +64,7 @@ const NewArrivals = () => {
     }, [hasPlayedIntro, products]);
 
     return (
-        <section ref={containerRef} className="py-16 bg-transparent">
+        <section ref={containerRef} className="py-16 bg-[#FFF7E4]">
             <div className="w-full">
                 <div className="flex justify-between items-end mb-10 px-8">
                     <h2 ref={titleRef} className="text-3xl md:text-4xl font-serif text-primary">
@@ -70,7 +72,7 @@ const NewArrivals = () => {
                     </h2>
                     <Link
                         ref={viewAllRef}
-                        to="/category/modern"
+                        href="/category/modern"
                         className="text-xs uppercase tracking-[0.2em] text-gray-500 hover:text-primary transition-colors border-b border-transparent hover:border-primary pb-1"
                     >
                         View all pieces
@@ -81,12 +83,12 @@ const NewArrivals = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1px]">
                     {displayedProducts.map((product, index) => (
                         <Link
-                            to={`/product/${product.id}`}
+                            href={`/product/${product.id}`}
                             key={product.id}
                             ref={el => cardsRef.current[index] = el}
                             className="group cursor-pointer block"
                         >
-                            <div className="relative overflow-hidden aspect-[3/4] mb-6 bg-gray-100">
+                            <div className="relative overflow-hidden aspect-[3/4] mb-6">
                                 <ImageWithLoader
                                     src={product.image}
                                     alt={product.name}

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useProduct } from '../context/ProductContext';
 import { uploadToCloudinary } from '../utils/cloudinaryHelper';

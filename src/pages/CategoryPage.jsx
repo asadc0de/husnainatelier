@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useProduct } from '../context/ProductContext';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -44,7 +47,7 @@ const CategoryPage = () => {
                 {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
                         <Link
-                            to={`/product/${product.id}`}
+                            href={`/product/${product.id}`}
                             key={product.id}
                             className="group cursor-pointer block"
                         >

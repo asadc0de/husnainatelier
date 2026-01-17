@@ -11,7 +11,7 @@ const ImageWithLoader = ({ src, alt, className, ...props }) => {
             {!isLoaded && !hasError && (
                 <div className="absolute inset-0 flex justify-center items-center bg-[#a4a4a4] z-10">
                     <img
-                        src={logo}
+                        src={logo.src}
                         alt="Loading..."
                         className="h-8 w-auto animate-pulse opacity-50"
                     />
@@ -20,7 +20,7 @@ const ImageWithLoader = ({ src, alt, className, ...props }) => {
 
             {/* Actual Image */}
             <img
-                src={src}
+                src={src?.src || src}
                 alt={alt}
                 className={`${className} transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                 onLoad={() => setIsLoaded(true)}

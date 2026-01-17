@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useProduct } from '../context/ProductContext';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -61,7 +63,7 @@ const ShopPage = () => {
                                     {category}
                                 </h2>
                                 <Link
-                                    to={`/category/${category.toLowerCase()}`}
+                                    href={`/category/${category.toLowerCase()}`}
                                     className="text-xs uppercase tracking-[0.2em] text-black hover:text-primary transition-colors pb-1 hidden sm:block"
                                 >
                                     View Full Collection
@@ -72,7 +74,7 @@ const ShopPage = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1px]">
                                 {categoryProducts.map((product) => (
                                     <Link
-                                        to={`/product/${product.id}`}
+                                        href={`/product/${product.id}`}
                                         key={product.id}
                                         className="group cursor-pointer block"
                                     >
@@ -96,7 +98,7 @@ const ShopPage = () => {
                             {/* Mobile View All Button */}
                             <div className="sm:hidden px-4 mt-8 flex justify-center">
                                 <Link
-                                    to={`/category/${category.toLowerCase()}`}
+                                    href={`/category/${category.toLowerCase()}`}
                                     className="text-xs uppercase tracking-[0.2em] text-gray-500 border-b border-gray-300 pb-1"
                                 >
                                     View Full Collection
@@ -113,7 +115,7 @@ const ShopPage = () => {
             {/* Bottom Call to Action */}
             <div className="mt-32 text-center px-4">
                 <p className="font-serif text-2xl mb-8 italic text-gray-400">Can't find what you're looking for?</p>
-                <Link to="/category/casual" className="px-10 py-4 border border-black text-black text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
+                <Link href="/category/casual" className="px-10 py-4 border border-black text-black text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
                     Browse All Categories
                 </Link>
             </div>

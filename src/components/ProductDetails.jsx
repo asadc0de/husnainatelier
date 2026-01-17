@@ -1,8 +1,8 @@
+"use client";
 
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { ChevronRight, Minus, Plus, ChevronLeft, ZoomIn, X } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import { useProduct } from '../context/ProductContext';
 import heroImg from '../assets/hero_wide.png';
@@ -130,14 +130,6 @@ const ProductDetails = () => {
 
     return (
         <>
-            <Helmet>
-                <title>{currentProduct.name} | Husnain Atelier</title>
-                <meta property="og:title" content={currentProduct.name} />
-                <meta property="og:description" content={`Price: ${currentProduct.price}`} />
-                <meta property="og:image" content={currentProduct.image} />
-                <meta property="og:url" content={window.location.href} />
-                <meta property="og:type" content="product" />
-            </Helmet>
 
             {/* Zoom Overlay */}
             {isZoomOpen && (//...

@@ -1,7 +1,9 @@
+"use client";
+
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import heroBg from '../assets/hero_pastel.png';
 import kurtiImg from '../assets/kurti.png';
 import lehengaImg from '../assets/lehenga.png';
@@ -64,7 +66,7 @@ const Categories = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 md:h-[80vh] md:min-h-[600px] gap-[1px]">
                 {collections.map((col, index) => (
                     <Link
-                        to={`/category/${col.name.toLowerCase()}`}
+                        href={`/category/${col.name.toLowerCase()}`}
                         key={col.name}
                         ref={el => columnsRef.current[index] = el}
                         className="relative group overflow-hidden h-[70vh] md:h-full cursor-pointer block"

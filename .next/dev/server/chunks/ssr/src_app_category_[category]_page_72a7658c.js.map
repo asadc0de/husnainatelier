@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///D:/Web%20Development/Google%20Antigravity/Husnain%20Atelier/src/app/category/%5Bcategory%5D/page.js"],"sourcesContent":["\"use client\";\r\n\r\nimport CategoryPage from '../../pages/CategoryPage';\r\n\r\nexport default function Page() {\r\n    return <CategoryPage />;\r\n}\r\n"],"names":[],"mappings":";;;;;;;;;;AAAA;;;AAIe,SAAS;IACpB,qBAAO,8OAAC;;;;;AACZ"}}]
+}

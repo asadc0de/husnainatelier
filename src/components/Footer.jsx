@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 const Footer = () => {
     return (
@@ -14,17 +14,17 @@ const Footer = () => {
                     <div className="flex gap-16 md:gap-32 text-sm font-sans text-[#FFF7E4]/60">
                         <div className="flex flex-col gap-4">
                             <h4 className="font-bold text-[#FFF7E4] mb-2">Shop</h4>
-                            <Link to="/category/modern" className="hover:text-[#FFF7E4] transition-colors">New Arrivals</Link>
-                            <Link to="/category/bridal" className="hover:text-[#FFF7E4] transition-colors">Bridal</Link>
-                            <Link to="/category/festive" className="hover:text-[#FFF7E4] transition-colors">Festive</Link>
-                            <Link to="/category/accessories" className="hover:text-[#FFF7E4] transition-colors">Accessories</Link>
+                            <Link href="/category/modern" className="hover:text-[#FFF7E4] transition-colors">New Arrivals</Link>
+                            <Link href="/category/bridal" className="hover:text-[#FFF7E4] transition-colors">Bridal</Link>
+                            <Link href="/category/festive" className="hover:text-[#FFF7E4] transition-colors">Festive</Link>
+                            <Link href="/category/accessories" className="hover:text-[#FFF7E4] transition-colors">Accessories</Link>
                         </div>
                         <div className="flex flex-col gap-4">
                             <h4 className="font-bold text-[#FFF7E4] mb-2">About</h4>
-                            <Link to="/" className="hover:text-[#FFF7E4] transition-colors">Our Story</Link>
-                            <Link to="/" className="hover:text-[#FFF7E4] transition-colors">Contact</Link>
-                            <Link to="/" className="hover:text-[#FFF7E4] transition-colors">Bookings</Link>
-                            <Link to="/" className="hover:text-[#FFF7E4] transition-colors">Legal</Link>
+                            <Link href="/" className="hover:text-[#FFF7E4] transition-colors">Our Story</Link>
+                            <Link href="/" className="hover:text-[#FFF7E4] transition-colors">Contact</Link>
+                            <Link href="/" className="hover:text-[#FFF7E4] transition-colors">Bookings</Link>
+                            <Link href="/" className="hover:text-[#FFF7E4] transition-colors">Legal</Link>
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useAnimation } from '../context/AnimationContext';
 import storyBg from '../assets/story_wide.png';
 import ImageWithLoader from '../components/ImageWithLoader';
@@ -87,7 +89,7 @@ const BrandStory = () => {
                             Refined craftsmanship meeting <br />
                             <span className="italic">contemporary silhouettes.</span>
                         </h2>
-                        <Link to="/shop" className="px-10 py-4 bg-white text-black uppercase tracking-widest text-xs font-bold hover:bg-gray-200 transition-all duration-300 inline-block">
+                        <Link href="/shop" className="px-10 py-4 bg-white text-black uppercase tracking-widest text-xs font-bold hover:bg-gray-200 transition-all duration-300 inline-block">
                             Shop
                         </Link>
                     </div>

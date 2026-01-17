@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useEffect, useRef } from 'react';
 import { X, Search } from 'lucide-react';
 import { gsap } from 'gsap';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useSearch } from '../context/SearchContext';
 
 const SearchOverlay = () => {
@@ -67,7 +69,7 @@ const SearchOverlay = () => {
                                 return (
                                     <div className="flex justify-center mb-12">
                                         <Link
-                                            to={`/category/${matchingCategory.toLowerCase()}`}
+                                            href={`/category/${matchingCategory.toLowerCase()}`}
                                             onClick={closeSearch}
                                             className="px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition-colors"
                                         >
@@ -83,7 +85,7 @@ const SearchOverlay = () => {
                             {searchResults.length > 0 ? (
                                 searchResults.map(product => (
                                     <Link
-                                        to={`/product/${product.id}`}
+                                        href={`/product/${product.id}`}
                                         key={product.id}
                                         onClick={closeSearch}
                                         className="group cursor-pointer"

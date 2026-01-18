@@ -230,13 +230,13 @@ const ProductDetails = () => {
                         <div className="flex gap-4 mb-12">
                             <button
                                 onClick={() => addToCart(currentProduct)}
-                                className="flex-1 bg-white text-black border border-black py-4 text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors cursor-pointer"
+                                className="flex-1 bg-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-[black/70] transition-colors cursor-pointer"
                             >
                                 Add to Cart
                             </button>
                             <button
                                 onClick={handleBuyNow}
-                                className="flex-1 bg-white text-black border border-black py-4 text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors cursor-pointer"
+                                className="flex-1 text-black border border-black py-4 text-xs font-bold uppercase tracking-widest  transition-colors cursor-pointer"
                             >
                                 Buy Now
                             </button>

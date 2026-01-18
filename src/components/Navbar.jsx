@@ -81,12 +81,38 @@ const Navbar = () => {
                             </Link>
 
                             {/* Dropdown */}
-                            <div className={`absolute left-0 top-full pt-4 min-w-[200px] z-[100] ${isShopOpen ? 'block' : 'hidden'}`}>
-                                <div className="bg-white text-black p-6 flex flex-col gap-4 shadow-xl border border-gray-100">
-                                    <Link href="/category/bridal" className="font-serif text-lg hover:text-gray-500 transition-colors">Bridal</Link>
-                                    <Link href="/category/casual" className="font-serif text-lg hover:text-gray-500 transition-colors">Casual</Link>
-                                    <Link href="/category/festive" className="font-serif text-lg hover:text-gray-500 transition-colors">Festive</Link>
-                                    <Link href="/category/modern" className="font-serif text-lg hover:text-gray-500 transition-colors">Modern</Link>
+                            <div className={`absolute left-0 top-full pt-4 min-w-[400px] z-[100] ${isShopOpen ? 'block' : 'hidden'}`}>
+                                <div className="bg-white text-black p-8 shadow-xl border border-gray-100 grid grid-cols-2 gap-x-12 gap-y-6">
+
+                                    {/* Column 1: New Arrival & Women */}
+                                    <div className="flex flex-col gap-6">
+                                        <Link href="/category/new-arrival" className="font-serif text-lg font-bold hover:text-gray-500 transition-colors">
+                                            New Arrival
+                                        </Link>
+
+                                        <div className="flex flex-col gap-3">
+                                            <span className="font-sans text-xs font-bold uppercase tracking-widest text-gray-400">Women</span>
+                                            <Link href="/category/bridal" className="font-serif text-md hover:text-gray-500 transition-colors">Bridal</Link>
+                                            <Link href="/category/festive" className="font-serif text-md hover:text-gray-500 transition-colors">Festive</Link>
+                                            <Link href="/category/casual" className="font-serif text-md hover:text-gray-500 transition-colors">Casual</Link>
+                                        </div>
+                                    </div>
+
+                                    {/* Column 2: Men & View All */}
+                                    <div className="flex flex-col gap-6">
+                                        {/* Spacer to align with Women section if needed, or just standard flow */}
+                                        <div className="flex flex-col gap-3 pt-[3.25rem]"> {/* Align with Women's list */}
+                                            <span className="font-sans text-xs font-bold uppercase tracking-widest text-gray-400">Men</span>
+                                            <Link href="/category/sherwani" className="font-serif text-md hover:text-gray-500 transition-colors">Sherwani</Link>
+                                            <Link href="/category/festive" className="font-serif text-md hover:text-gray-500 transition-colors">Festive</Link>
+                                            <Link href="/category/casual" className="font-serif text-md hover:text-gray-500 transition-colors">Casual</Link>
+                                        </div>
+
+                                        <Link href="/shop" className="font-serif text-lg font-bold hover:text-gray-500 transition-colors border-t border-gray-100 pt-4 mt-auto">
+                                            View All
+                                        </Link>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -116,7 +142,7 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
-            </nav>
+            </nav >
 
 
 

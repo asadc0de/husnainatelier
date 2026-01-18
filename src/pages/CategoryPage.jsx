@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useProduct } from '../context/ProductContext';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ImageWithLoader from '../components/ImageWithLoader';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,11 +17,19 @@ const CategoryPage = () => {
     const containerRef = useRef(null);
     const titleRef = useRef(null);
     const gridRef = useRef(null);
+    const loaderRef = useRef(null);
+
+    const [visibleCount, setVisibleCount] = useState(12);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     // Filter products (case-insensitive)
-    const filteredProducts = products.filter(p =>
+    const allCategoryProducts = products.filter(p =>
         p.category.toLowerCase() === category.toLowerCase()
     );
+
+    const visibleProducts = allCategoryProducts.slice(0, visibleCount);
+    const hasMore = visibleCount < allCategoryProducts.length;
+
 
     useEffect(() => {
         // Animation on mount
@@ -31,6 +40,43 @@ const CategoryPage = () => {
             { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" }
         );
     }, [category]); // Re-run animation when category changes
+
+    // Reset pagination when category changes
+    useEffect(() => {
+        setVisibleCount(12);
+    }, [category]);
+
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const target = entries[0];
+                if (target.isIntersecting && hasMore && !isLoadingMore) {
+                    setIsLoadingMore(true);
+                    setTimeout(() => {
+                        setVisibleCount(prev => prev + 12);
+                        setIsLoadingMore(false);
+                    }, 500);
+                }
+            },
+            {
+                root: null,
+                rootMargin: '100px',
+                threshold: 0.1,
+            }
+        );
+
+        if (loaderRef.current) {
+            observer.observe(loaderRef.current);
+        }
+
+        return () => {
+            if (loaderRef.current) {
+                observer.unobserve(loaderRef.current);
+            }
+        };
+    }, [hasMore, isLoadingMore]);
+
 
     return (
         <div ref={containerRef} className="min-h-screen pt-32 pb-16 w-full bg-[#FFF7E4]">
@@ -44,8 +90,8 @@ const CategoryPage = () => {
 
             {/* Product Grid */}
             <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1px]">
-                {filteredProducts.length > 0 ? (
-                    filteredProducts.map((product) => (
+                {visibleProducts.length > 0 ? (
+                    visibleProducts.map((product) => (
                         <Link
                             href={`/product/${product.id}`}
                             key={product.id}
@@ -73,6 +119,20 @@ const CategoryPage = () => {
                     </div>
                 )}
             </div>
+
+            {/* Loading Indicator */}
+            {hasMore && (
+                <div ref={loaderRef} className="flex justify-center mt-12 mb-8">
+                    <LoadingSpinner />
+                </div>
+            )}
+
+            {/* End of List Message */}
+            {!hasMore && visibleProducts.length > 0 && (
+                <div className="text-center mt-12 mb-8 text-gray-400">
+                    <p className="font-serif italic text-sm">You've reached the end of this collection.</p>
+                </div>
+            )}
         </div>
     );
 };

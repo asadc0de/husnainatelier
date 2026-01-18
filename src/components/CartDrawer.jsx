@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { X, Minus, Plus, Trash2 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useCart } from '../context/CartContext';
@@ -59,13 +60,22 @@ const CartDrawer = () => {
                     ) : (
                         cartItems.map(item => (
                             <div key={item.id} className="flex gap-4">
-                                <div className="w-20 h-24 bg-gray-100 flex-shrink-0">
+                                <Link
+                                    href={`/product/${item.id}`}
+                                    className="w-20 h-24 bg-gray-100 flex-shrink-0 block"
+                                    onClick={() => setIsCartOpen(false)}
+                                >
                                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                </div>
+                                </Link>
                                 <div className="flex-1 flex flex-col justify-between">
                                     <div>
                                         <div className="flex justify-between items-start">
-                                            <h4 className="font-serif text-sm text-black max-w-[140px]">{item.name}</h4>
+                                            <Link
+                                                href={`/product/${item.id}`}
+                                                onClick={() => setIsCartOpen(false)}
+                                            >
+                                                <h4 className="font-serif text-sm text-black max-w-[140px] hover:underline">{item.name}</h4>
+                                            </Link>
                                             <button onClick={() => removeFromCart(item.id)} className="text-gray-400 hover:text-red-500 transition-colors">
                                                 <Trash2 size={16} />
                                             </button>

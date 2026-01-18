@@ -35,11 +35,18 @@ const Admin = () => {
         name: '',
         price: 'Rs. ',
         description: '',
+        gender: 'Women',
         category: 'Bridal',
     };
 
     const [formData, setFormData] = useState(initialFormState);
-    const categories = ['Bridal', 'Casual', 'Festive', 'Modern', 'Accessories'];
+
+    // Separate Category Lists
+    const womenCategories = ['Bridal', 'Casual', 'Festive', 'Modern', 'Accessories'];
+    const menCategories = ['Sherwani', 'Festive', 'Casual'];
+
+    // Helper to get current categories based on selected gender
+    const currentCategories = formData.gender === 'Men' ? menCategories : womenCategories;
 
     // --- FORM HANDLERS ---
 
@@ -62,7 +69,17 @@ const Admin = () => {
             newValue = value.charAt(0).toUpperCase() + value.slice(1);
         }
 
-        setFormData(prev => ({ ...prev, [name]: newValue }));
+        setFormData(prev => {
+            const updated = { ...prev, [name]: newValue };
+
+            // If gender changes, reset category to first available option for that gender
+            if (name === 'gender') {
+                const newCats = newValue === 'Men' ? menCategories : womenCategories;
+                updated.category = newCats[0];
+            }
+
+            return updated;
+        });
     };
 
     // --- IMAGE HANDLERS ---
@@ -242,6 +259,7 @@ const Admin = () => {
             name: product.name,
             price: product.price,
             description: product.description || '',
+            gender: product.gender || 'Women', // Fallback for old data
             category: product.category,
         });
 
@@ -481,9 +499,16 @@ const Admin = () => {
                                     <input type="text" name="price" value={formData.price} onChange={handleChange} className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none" required />
                                 </div>
                                 <div>
+                                    <label className="block font-serif text-lg mb-2">Gender *</label>
+                                    <select name="gender" value={formData.gender} onChange={handleChange} className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none bg-white">
+                                        <option value="Women">Women</option>
+                                        <option value="Men">Men</option>
+                                    </select>
+                                </div>
+                                <div>
                                     <label className="block font-serif text-lg mb-2">Category *</label>
                                     <select name="category" value={formData.category} onChange={handleChange} className="w-full border border-gray-300 p-3 font-sans focus:border-black outline-none bg-white">
-                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                        {currentCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
                                 <div>

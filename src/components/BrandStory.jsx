@@ -62,14 +62,17 @@ const BrandStory = () => {
     }, [hasPlayedIntro]);
 
     return (
-        <section className="w-full py-16">
-            <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-5xl font-serif text-black uppercase tracking-widest">
-                    The Story
-                </h2>
-            </div>
+        <section className="w-full relative">
+            {/* Title Overlay - Positioned absolutely to sit on top of the image or above it if preferred. 
+                Given "images takes full screen", I'll make the container h-screen. 
+                I'll put the title inside the overlay or keep it as a header. 
+                Let's make the section h-screen and put the title inside for a true full screen feel, 
+                OR keep the title above and make the image h-screen. 
+                The user said "section images takes full screen". 
+                I will make the main container h-screen.
+            */}
 
-            <div ref={containerRef} className="relative w-full h-[85vh] overflow-hidden">
+            <div ref={containerRef} className="relative w-full h-screen overflow-hidden">
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     <ImageWithLoader
@@ -82,8 +85,15 @@ const BrandStory = () => {
                     <div className="absolute inset-0 bg-black/30"></div>
                 </div>
 
-                {/* Centered Content */}
+                {/* Content Overlay */}
                 <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4 text-white">
+                    {/* Moved Title here to be part of the full screen experience */}
+                    <div className="mb-12">
+                        <h2 className="text-3xl md:text-5xl font-serif text-white uppercase tracking-widest">
+                            The Story
+                        </h2>
+                    </div>
+
                     <div ref={textRef} className="max-w-2xl mx-auto">
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-tight mb-8">
                             Refined craftsmanship meeting <br />

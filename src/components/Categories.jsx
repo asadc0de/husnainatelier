@@ -4,28 +4,22 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
-import heroBg from '../assets/hero_pastel.png';
-import kurtiImg from '../assets/kurti.png';
-import lehengaImg from '../assets/lehenga.png';
 import { useAnimation } from '../context/AnimationContext';
 import ImageWithLoader from './ImageWithLoader';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Categories = () => {
+const Categories = ({ title, collections = [] }) => {
     const sectionRef = useRef(null);
     const columnsRef = useRef([]);
     const titleRef = useRef(null);
 
-    const collections = [
-        { name: 'Bridal', image: heroBg },
-        { name: 'Festive', image: kurtiImg },
-        { name: 'Modern', image: lehengaImg },
-    ];
-
     const { hasPlayedIntro } = useAnimation();
 
     useEffect(() => {
+        // If no collections, don't run animation logic
+        if (!collections.length) return;
+
         if (hasPlayedIntro) {
             gsap.set(columnsRef.current, { y: 0, opacity: 1 });
             gsap.set(titleRef.current, { y: 0, opacity: 1 });
@@ -54,19 +48,21 @@ const Categories = () => {
                 },
                 "-=0.5"
             );
-    }, [hasPlayedIntro]);
+    }, [hasPlayedIntro, collections]);
+
+    if (!collections.length) return null;
 
     return (
         <section ref={sectionRef} className="w-full bg-[#FFF7E4] py-16">
             <div className="px-8 mb-12 text-center">
                 <h2 ref={titleRef} className="text-3xl md:text-5xl font-serif text-black uppercase tracking-widest">
-                    Our Latest Collections
+                    {title}
                 </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 md:h-[80vh] md:min-h-[600px] gap-[1px]">
                 {collections.map((col, index) => (
                     <Link
-                        href={`/category/${col.name.toLowerCase()}`}
+                        href={col.link || `/category/${col.name.toLowerCase()}`}
                         key={col.name}
                         ref={el => columnsRef.current[index] = el}
                         className="relative group overflow-hidden h-[70vh] md:h-full cursor-pointer block"
